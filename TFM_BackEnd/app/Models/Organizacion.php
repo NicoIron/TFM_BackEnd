@@ -8,7 +8,7 @@ class Organizacion extends Model
 {
     //
 
-    protected $table = 'organizaciones';
+    protected $table = 'organizacion';
 
     protected $fillable = [
         'nombre',

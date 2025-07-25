@@ -14,7 +14,7 @@ class Roles extends Model
         'id_organizacion',
         'id_jerarquia',
         'nombre_rol',
-        'jefe_imediato',
+        'jefe_inmediato',
         'eliminado'
     ];
 

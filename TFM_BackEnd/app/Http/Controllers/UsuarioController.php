@@ -4,34 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use App\Utils\ResultResponse;
 
 class UsuarioController extends Controller
 {
-    /**
-     * Muestra un listado de todos los usuarios.
-     * GET /usuarios
-     */
-    public function index()
+    public function listar()
     {
-        $usuarios = Usuario::all();
-        return response()->json($usuarios);
+        $respuesta = new ResultResponse();
+        $respuesta->setData(Usuario::all());
+        $respuesta->setMessage('Listado de usuarios');
+        $respuesta->setStatusCode(ResultResponse::SUCCESS_CODE);
+        return response()->json($respuesta, 200);
     }
 
-    /**
-     * Muestra el formulario para crear un nuevo usuario.
-     * GET /usuarios/create
-     */
-    public function create()
-    {
-        // Normalmente se retorna una vista, en APIs no se usa.
-        return response()->json(['message' => 'Mostrar formulario de creación']);
-    }
-
-    /**
-     * Almacena un nuevo usuario en la base de datos.
-     * POST /usuarios
-     */
-    public function store(Request $request)
+    public function guardar(Request $request)
     {
         $validated = $request->validate([
             'id_organizacion' => 'required|integer',
@@ -45,37 +31,29 @@ class UsuarioController extends Controller
             'contraseña' => 'required|string|min:6',
         ]);
 
-        // Crea el usuario
         $usuario = Usuario::create($validated);
 
-        return response()->json($usuario, 201);
+        $respuesta = new ResultResponse();
+        $respuesta->setData($usuario);
+        $respuesta->setMessage('Usuario creado');
+        $respuesta->setStatusCode(ResultResponse::SUCCESS_CODE);
+
+        return response()->json($respuesta, 201);
     }
 
-    /**
-     * Muestra los detalles de un solo usuario.
-     * GET /usuarios/{id}
-     */
-    public function show($id)
+    public function ver($id)
     {
         $usuario = Usuario::findOrFail($id);
-        return response()->json($usuario);
+
+        $respuesta = new ResultResponse();
+        $respuesta->setData($usuario);
+        $respuesta->setMessage('Usuario encontrado');
+        $respuesta->setStatusCode(ResultResponse::SUCCESS_CODE);
+
+        return response()->json($respuesta, 200);
     }
 
-    /**
-     * Muestra el formulario para editar un usuario.
-     * GET /usuarios/{id}/edit
-     */
-    public function edit($id)
-    {
-        // Normalmente se retorna una vista, en APIs no se usa.
-        return response()->json(['message' => "Mostrar formulario de edición para el usuario $id"]);
-    }
-
-    /**
-     * Actualiza un usuario existente.
-     * PUT/PATCH /usuarios/{id}
-     */
-    public function update(Request $request, $id)
+    public function actualizar(Request $request, $id)
     {
         $usuario = Usuario::findOrFail($id);
 
@@ -93,19 +71,24 @@ class UsuarioController extends Controller
 
         $usuario->update($validated);
 
-        return response()->json($usuario);
+        $respuesta = new ResultResponse();
+        $respuesta->setData($usuario);
+        $respuesta->setMessage('Usuario actualizado');
+        $respuesta->setStatusCode(ResultResponse::SUCCESS_CODE);
+
+        return response()->json($respuesta, 200);
     }
 
-    /**
-     * Elimina un usuario de forma lógica (marcar como eliminado).
-     * DELETE /usuarios/{id}
-     */
-    public function destroy($id)
+    public function eliminar($id)
     {
         $usuario = Usuario::findOrFail($id);
         $usuario->eliminado = true;
         $usuario->save();
 
-        return response()->json(['message' => 'Usuario eliminado lógicamente']);
+        $respuesta = new ResultResponse();
+        $respuesta->setMessage('Usuario eliminado lógicamente');
+        $respuesta->setStatusCode(ResultResponse::SUCCESS_CODE);
+
+        return response()->json($respuesta, 200);
     }
 }
