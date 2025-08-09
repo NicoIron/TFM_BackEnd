@@ -6,31 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('tipos_producto', function (Blueprint $table) {
-    $table->id();
-    $table->unsignedBigInteger('id_organizacion');
-    $table->string('nombre', 100);
-    $table->text('descripcion')->nullable();
-    $table->unsignedBigInteger('id_padre')->nullable();
-    $table->boolean('eliminado')->default(false);
-    $table->timestamps();
-
-    $table->foreign('id_organizacion')->references('id')->on('organizacion');
-    $table->foreign('id_padre')->references('id')->on('tipos_producto');
-});
-
+        Schema::create('tipo_productos', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('id_producto', 50)->unique();
+            $table->string('id_organizacion', 50);
+            $table->string('nombre_producto', 100);
+            $table->text('descripcion')->nullable();
+            $table->foreign('id_organizacion')
+                ->references('id_organizacion')->on('organizacion')
+                ->onDelete('restrict');
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('tipos_producto');
+        Schema::dropIfExists('tipo_productos');
     }
 };

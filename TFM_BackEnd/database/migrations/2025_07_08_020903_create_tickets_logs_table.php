@@ -6,26 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
- Schema::create('tickets_logs', function (Blueprint $table) {
-    $table->id();
-    $table->unsignedBigInteger('id_ticket');
-    $table->string('action', 255);
-    $table->boolean('eliminado')->default(false);
-    $table->timestamps();
-
-    $table->foreign('id_ticket')->references('id')->on('tickets');
-});
-
+        Schema::create('tickets_logs', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('id_ticket_log', 50)->unique();
+            $table->string('id_ticket', 50);
+            $table->string('id_usuario', 50);
+            $table->string('estado_anterior', 50)->nullable();
+            $table->string('estado_nuevo', 50);
+            $table->timestamp('fecha_cambio')->nullable();
+            $table->foreign('id_ticket')
+                ->references('id_ticket')->on('tickets')
+                ->onDelete('restrict');
+            $table->foreign('id_usuario')->references('id_usuario')->on('usuarios')->onDelete('restrict');
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tickets_logs');

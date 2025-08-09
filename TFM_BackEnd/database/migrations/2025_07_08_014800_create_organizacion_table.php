@@ -4,14 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('organizacion', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre', 100);
+            $table->bigIncrements('id');
+            $table->string('id_organizacion', 50)->unique();
+            $table->string('nombre_organizacion', 100)->nullable();
             $table->text('descripcion')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

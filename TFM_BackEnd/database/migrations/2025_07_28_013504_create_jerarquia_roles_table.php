@@ -8,18 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('jerarquia_roles', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('id_rol', 50)->unique();
-            $table->string('nombre_rol', 100);
-            $table->string('jefe_inmediato', 100)->nullable();
-            $table->string('id_organizacion', 50);
             $table->unsignedBigInteger('id_jerarquia');
-            $table->foreign('id_organizacion')
-                ->references('id_organizacion')->on('organizacion')
-                ->onDelete('restrict');
+            $table->unsignedBigInteger('id_rol');
+            $table->unsignedBigInteger('id_rol_superior')->nullable();
             $table->foreign('id_jerarquia')
                 ->references('id')->on('jerarquia_inicial')
+                ->onDelete('restrict');
+            $table->foreign('id_rol')
+                ->references('id')->on('roles')
+                ->onDelete('restrict');
+            $table->foreign('id_rol_superior')
+                ->references('id')->on('roles')
                 ->onDelete('restrict');
             $table->timestamps();
             $table->softDeletes();
@@ -28,6 +29,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('jerarquia_roles');
     }
 };
