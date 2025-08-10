@@ -4,95 +4,141 @@ namespace App\Http\Controllers;
 
 use App\Models\Organizacion;
 use Illuminate\Http\Request;
+use App\Utils\ResultResponse;
+use Illuminate\Support\Facades\Validator;
 
 class OrganizacionController extends Controller
 {
     public function listar()
     {
-        return response()->json([
-            'success' => true,
-            'data' => Organizacion::all(),
-            'message' => 'Listado de organizaciones'
-        ]);
+        $response = new ResultResponse();
+
+        try {
+            $organizaciones = Organizacion::all();
+            $response->setData($organizaciones);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Listado de organizaciones');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al obtener las organizaciones: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
     }
 
     public function guardar(Request $request)
     {
-        $validated = $request->validate([
-            'id_organizacion'      => 'required|string|max:50|unique:organizacion,id_organizacion',
-            'nombre_organizacion'  => 'required|string|max:100',
-            'descripcion'          => 'nullable|string',
+        $response = new ResultResponse();
+
+        $validator = Validator::make($request->all(), [
+            'id_organizacion'     => 'required|string|max:50|unique:organizacion,id_organizacion',
+            'nombre_organizacion' => 'required|string|max:100',
+            'descripcion'         => 'nullable|string',
         ]);
 
-        $organizacion = Organizacion::create($validated);
+        if ($validator->fails()) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Error en la validación.');
+            $response->setData($validator->errors());
+            return response()->json($response, $response->getStatusCode());
+        }
 
-        return response()->json([
-            'success' => true,
-            'data' => $organizacion,
-            'message' => 'Organización creada correctamente'
-        ], 201);
+        try {
+            $organizacion = Organizacion::create($request->all());
+            $response->setData($organizacion);
+            $response->setStatusCode(201); // Created
+            $response->setMessage('Organización creada correctamente');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al crear la organización: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
     }
 
     public function ver($id)
     {
-        $organizacion = Organizacion::find($id);
+        $response = new ResultResponse();
 
-        if (!$organizacion) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Organización no encontrada'
-            ], 404);
+        try {
+            $organizacion = Organizacion::find($id);
+
+            if (!$organizacion) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage('Organización no encontrada');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            $response->setData($organizacion);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Organización encontrada');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al obtener la organización: ' . $e->getMessage());
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $organizacion,
-            'message' => 'Organización encontrada'
-        ]);
+        return response()->json($response, $response->getStatusCode());
     }
 
     public function actualizar(Request $request, $id)
     {
-        $organizacion = Organizacion::find($id);
+        $response = new ResultResponse();
 
-        if (!$organizacion) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Organización no encontrada'
-            ], 404);
+        $validator = Validator::make($request->all(), [
+            'id_organizacion'     => 'sometimes|required|string|max:50|unique:organizacion,id_organizacion,' . $id,
+            'nombre_organizacion' => 'sometimes|required|string|max:100',
+            'descripcion'         => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Error en la validación.');
+            $response->setData($validator->errors());
+            return response()->json($response, $response->getStatusCode());
         }
 
-        $validated = $request->validate([
-            'id_organizacion'      => 'sometimes|required|string|max:50|unique:organizacion,id_organizacion,' . $id,
-            'nombre_organizacion'  => 'sometimes|required|string|max:100',
-            'descripcion'          => 'nullable|string',
-        ]);
+        try {
+            $organizacion = Organizacion::find($id);
 
-        $organizacion->update($validated);
+            if (!$organizacion) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage('Organización no encontrada');
+                return response()->json($response, $response->getStatusCode());
+            }
 
-        return response()->json([
-            'success' => true,
-            'data' => $organizacion,
-            'message' => 'Organización actualizada'
-        ]);
+            $organizacion->update($request->all());
+            $response->setData($organizacion);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Organización actualizada');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al actualizar la organización: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
     }
 
     public function eliminar($id)
     {
-        $organizacion = Organizacion::find($id);
+        $response = new ResultResponse();
 
-        if (!$organizacion) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Organización no encontrada'
-            ], 404);
+        try {
+            $organizacion = Organizacion::find($id);
+
+            if (!$organizacion) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage('Organización no encontrada');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            $organizacion->delete();
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Organización eliminada');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al eliminar la organización: ' . $e->getMessage());
         }
 
-        $organizacion->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Organización eliminada'
-        ]);
+        return response()->json($response, $response->getStatusCode());
     }
 }

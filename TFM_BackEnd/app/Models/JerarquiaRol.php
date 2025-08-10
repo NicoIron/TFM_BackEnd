@@ -3,25 +3,35 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class JerarquiaRol extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'jerarquia_roles';
 
     protected $fillable = [
-        'nombre',
+        'id_jerarquia',
+        'id_rol',
         'id_rol_superior',
-        'nivel'
     ];
 
-    public function rolSuperior(): BelongsTo
+    // Relación con la jerarquía inicial
+    public function jerarquia()
     {
-        return $this->belongsTo(JerarquiaRol::class, 'id_rol_superior');
+        return $this->belongsTo(JerarquiaInicial::class, 'id_jerarquia');
     }
 
-    public function rolesSubordinados()
+    // Relación con el rol principal
+    public function rol()
     {
-        return $this->hasMany(Roles::class, 'id_jerarquia');
+        return $this->belongsTo(Roles::class, 'id_rol');
+    }
+
+    // Relación con el rol superior
+    public function rolSuperior()
+    {
+        return $this->belongsTo(Roles::class, 'id_rol_superior');
     }
 }

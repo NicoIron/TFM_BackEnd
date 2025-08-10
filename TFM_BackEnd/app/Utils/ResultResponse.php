@@ -9,6 +9,8 @@ class ResultResponse
     public const ERROR_CONFLICT_CODE = 409;
     const ERROR_ELEMENT_NOT_FOUND_CODE = 404;
     const ERROR_INTERNAL_SERVER = 500;
+    const ERROR_VALIDATION_CODE = 422;
+
 
     const TXT_SUCCESS_CODE = 'Success';
     const TXT_ERROR_CODE = 'Error';

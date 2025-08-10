@@ -8,6 +8,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\TiposProductosController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\TicketsLogsController;
+use App\Http\Controllers\JerarquiaRolController;
 
 Route::get('/debug', fn() => response()->json(['ok' => true]));
 
@@ -47,6 +48,16 @@ Route::prefix('roles')->group(function () {
     Route::get('/{id}', [RolesController::class, 'ver']);
     Route::put('/{id}', [RolesController::class, 'actualizar']);
     Route::delete('/{id}', [RolesController::class, 'eliminar']);
+});
+
+
+//JERARQUÍA ROLES
+Route::prefix('jerarquia-roles')->group(function () {
+    Route::get('/listarJerarquiaRol', [JerarquiaRolController::class, 'listar']);
+    Route::get('/verJerarquiaRol/{id}', [JerarquiaRolController::class, 'ver']);
+    Route::post('/guardarJerarquiaRol', [JerarquiaRolController::class, 'guardar']);
+    Route::put('/actualizarJerarquiaRol/{id}', [JerarquiaRolController::class, 'actualizar']);
+    Route::delete('/eliminarJerarquiaRol/{id}', [JerarquiaRolController::class, 'eliminar']);
 });
 
 // TIPOS DE PRODUCTOS
