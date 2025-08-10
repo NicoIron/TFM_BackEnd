@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Organizacion;
 use Illuminate\Http\Request;
-use App\Utils\ResultResponse;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class OrganizacionController extends Controller
 {
@@ -21,8 +19,9 @@ class OrganizacionController extends Controller
     public function guardar(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'descripcion' => 'nullable|string',
+            'id_organizacion'      => 'required|string|max:50|unique:organizacion,id_organizacion',
+            'nombre_organizacion'  => 'required|string|max:100',
+            'descripcion'          => 'nullable|string',
         ]);
 
         $organizacion = Organizacion::create($validated);
@@ -64,8 +63,9 @@ class OrganizacionController extends Controller
         }
 
         $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:100',
-            'descripcion' => 'nullable|string',
+            'id_organizacion'      => 'sometimes|required|string|max:50|unique:organizacion,id_organizacion,' . $id,
+            'nombre_organizacion'  => 'sometimes|required|string|max:100',
+            'descripcion'          => 'nullable|string',
         ]);
 
         $organizacion->update($validated);

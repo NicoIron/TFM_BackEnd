@@ -2,101 +2,131 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Jerarquia;
-use Illuminate\Http\Request;
+use App\Models\JerarquiaInicial;
 use App\Utils\ResultResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class JerarquiaController extends Controller
 {
     public function listar()
     {
         $response = new ResultResponse();
-        $response->setData(Jerarquia::all());
-        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-        $response->setMessage('Listado de jerarquías');
+
+        try {
+            $jerarquias = JerarquiaInicial::with('organizacion')->get();
+
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+            $response->setData($jerarquias);
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage($e->getMessage());
+        }
+
         return response()->json($response);
     }
 
     public function guardar(Request $request)
     {
-        $validated = $request->validate([
-            'id_organizacion' => 'required|integer|exists:organizacion,id',
-            'cargo' => 'required|string|max:100',
-            'eliminado' => 'required|boolean',
+        $response = new ResultResponse();
+
+        $validator = Validator::make($request->all(), [
+            'id_jerarquia'    => 'required|integer',
+            'id_organizacion' => 'required|integer|exists:organizacion,id_organizacion',
+            'cargo'           => 'required|string|max:255',
         ]);
 
-        $jerarquia = Jerarquia::create($validated);
+        if ($validator->fails()) {
+            $response->setMessage($validator->errors()->first());
+            return response()->json($response);
+        }
 
-        $response = new ResultResponse();
-        $response->setData($jerarquia);
-        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-        $response->setMessage('Jerarquía creada correctamente');
+        try {
+            $jerarquia = JerarquiaInicial::create($request->all());
 
-        return response()->json($response, 201);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+            $response->setData($jerarquia);
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage($e->getMessage());
+        }
+
+        return response()->json($response);
     }
 
     public function ver($id)
     {
-        $jerarquia = Jerarquia::find($id);
-
-        if (!$jerarquia) {
-            $response = new ResultResponse();
-            $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
-            $response->setMessage('Jerarquía no encontrada');
-            return response()->json($response, 404);
-        }
-
         $response = new ResultResponse();
-        $response->setData($jerarquia);
-        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-        $response->setMessage('Jerarquía encontrada');
+
+        try {
+            $jerarquia = JerarquiaInicial::with('organizacion')->find($id);
+
+            if (!$jerarquia) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUND_CODE);
+                return response()->json($response);
+            }
+
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+            $response->setData($jerarquia);
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage($e->getMessage());
+        }
 
         return response()->json($response);
     }
 
     public function actualizar(Request $request, $id)
     {
-        $jerarquia = Jerarquia::find($id);
-
-        if (!$jerarquia) {
-            $response = new ResultResponse();
-            $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
-            $response->setMessage('Jerarquía no encontrada');
-            return response()->json($response, 404);
-        }
-
-        $validated = $request->validate([
-            'id_organizacion' => 'sometimes|integer|exists:organizacion,id',
-            'cargo' => 'sometimes|string|max:100',
-            'eliminado' => 'sometimes|boolean',
-        ]);
-
-        $jerarquia->update($validated);
-
         $response = new ResultResponse();
-        $response->setData($jerarquia);
-        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-        $response->setMessage('Jerarquía actualizada');
+
+        try {
+            $jerarquia = JerarquiaInicial::find($id);
+
+            if (!$jerarquia) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUND_CODE);
+                return response()->json($response);
+            }
+
+            $jerarquia->update($request->all());
+
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+            $response->setData($jerarquia);
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage($e->getMessage());
+        }
 
         return response()->json($response);
     }
 
     public function eliminar($id)
     {
-        $jerarquia = Jerarquia::find($id);
-
-        if (!$jerarquia) {
-            $response = new ResultResponse();
-            $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
-            $response->setMessage('Jerarquía no encontrada');
-            return response()->json($response, 404);
-        }
-
-        $jerarquia->delete();
-
         $response = new ResultResponse();
-        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-        $response->setMessage('Jerarquía eliminada');
+
+        try {
+            $jerarquia = JerarquiaInicial::find($id);
+
+            if (!$jerarquia) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUND_CODE);
+                return response()->json($response);
+            }
+
+            $jerarquia->delete();
+
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage($e->getMessage());
+        }
 
         return response()->json($response);
     }

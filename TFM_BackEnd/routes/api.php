@@ -1,14 +1,13 @@
 <?php
 
+use App\Http\Controllers\JerarquiaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrganizacionController;
 use App\Http\Controllers\UsuarioController;
-use App\Http\Controllers\JerarquiaController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\TiposProductosController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\TicketsLogsController;
-
 
 Route::get('/debug', fn() => response()->json(['ok' => true]));
 
@@ -31,14 +30,15 @@ Route::prefix('usuarios')->group(function () {
     Route::delete('/{id}', [UsuarioController::class, 'eliminar']);
 });
 
-// JERARQUÍAS
-Route::prefix('jerarquias')->group(function () {
+// JERARQUÍAS INICIALES
+Route::prefix('jerarquia-inicial')->group(function () {
     Route::get('/', [JerarquiaController::class, 'listar']);
     Route::post('/', [JerarquiaController::class, 'guardar']);
     Route::get('/{id}', [JerarquiaController::class, 'ver']);
     Route::put('/{id}', [JerarquiaController::class, 'actualizar']);
     Route::delete('/{id}', [JerarquiaController::class, 'eliminar']);
 });
+
 
 // ROLES
 Route::prefix('roles')->group(function () {
