@@ -6,27 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->id();
             $table->string('id_rol', 50)->unique();
             $table->string('nombre_rol', 100);
-            $table->string('jefe_inmediato', 100)->nullable();
+            $table->integer('nivel')->nullable();
             $table->string('id_organizacion', 50);
+            $table->foreign('id_organizacion')->references('id_organizacion')->on('organizacion');
             $table->unsignedBigInteger('id_jerarquia');
-            $table->foreign('id_organizacion')
-                ->references('id_organizacion')->on('organizacion')
-                ->onDelete('restrict');
-            $table->foreign('id_jerarquia')
-                ->references('id')->on('jerarquia_inicial')
-                ->onDelete('restrict');
+            $table->foreign('id_jerarquia')->references('id')->on('jerarquia_inicial');
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('roles');
     }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('descr_compra')->nullable();
             $table->string('estado_ticket', 50);
             $table->timestamp('fecha_cierre')->nullable();
+
             $table->foreign('id_usuario')
                 ->references('id_usuario')->on('usuarios')
                 ->onDelete('restrict');
@@ -30,7 +31,8 @@ return new class extends Migration
                 ->onDelete('restrict');
 
                 // Aquí la restricción de unicidad para usuario + producto
-    $table->unique(['id_usuario', 'id_tipo_producto']);
+            $table->unique(['id_usuario', 'id_tipo_producto']);
+
             $table->timestamps();
             $table->softDeletes();
         });
@@ -41,3 +43,7 @@ return new class extends Migration
         Schema::dropIfExists('tickets');
     }
 };
+
+
+
+

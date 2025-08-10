@@ -14,32 +14,32 @@ class Roles extends Model
     protected $fillable = [
         'id_rol',
         'nombre_rol',
-        'jefe_inmediato',
+        'nivel',
         'id_organizacion',
         'id_jerarquia',
     ];
 
-    /**
-     * Relación inversa: Este rol pertenece a una organización
-     */
+    // Relación con organización
     public function organizacion()
     {
         return $this->belongsTo(Organizacion::class, 'id_organizacion', 'id_organizacion');
     }
 
-    /**
-     * Relación inversa: Este rol pertenece a una jerarquía inicial
-     */
+    // Relación con jerarquía inicial
     public function jerarquia()
     {
-        return $this->belongsTo(JerarquiaInicial::class, 'id_jerarquia', 'id');
+        return $this->belongsTo(JerarquiaInicial::class, 'id_jerarquia');
     }
 
-    /**
-     * Relación uno a muchos: Un rol tiene muchos usuarios
-     */
-    public function usuarios()
+    // Relaciones jerarquia_roles donde este rol es principal
+    public function jerarquiaRoles()
     {
-        return $this->hasMany(Usuario::class, 'id_rol', 'id_rol');
+        return $this->hasMany(JerarquiaRol::class, 'id_rol');
+    }
+
+    // Relaciones jerarquia_roles donde este rol es superior (jefe inmediato)
+    public function rolesSuperiores()
+    {
+        return $this->hasMany(JerarquiaRol::class, 'id_rol_superior');
     }
 }

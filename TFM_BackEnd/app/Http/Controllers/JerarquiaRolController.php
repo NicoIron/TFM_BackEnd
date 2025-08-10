@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JerarquiaRol;
+use App\Models\Roles;
 use Illuminate\Http\Request;
 use App\Utils\ResultResponse;
 use Illuminate\Support\Facades\Validator;
@@ -47,12 +48,29 @@ class JerarquiaRolController extends Controller
             return response()->json($response, $response->getStatusCode());
         }
 
+        // --- Validación clave: el jefe inmediato debe tener un nivel jerárquico superior (menor número) al rol ---
+        $rol = Roles::find($request->id_rol);
+        $jefe = Roles::find($request->id_rol_superior);
+
+        if (!$rol || !$jefe) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Rol o jefe inmediato no encontrado para validación de niveles.');
+            return response()->json($response, $response->getStatusCode());
+        }
+
+        if ($jefe->nivel >= $rol->nivel) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('El jefe inmediato debe tener un nivel jerárquico superior (menor número) al rol.');
+            return response()->json($response, $response->getStatusCode());
+        }
+        // --- Fin validación niveles ---
+
         try {
             $jerarquiaRol = JerarquiaRol::create($request->all());
             $response->setData($jerarquiaRol);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Jerarquía y rol creado correctamente');
-            return response()->json($response, 201); // Para creación exitosa
+            return response()->json($response, 201);
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al crear el registro: ' . $e->getMessage());
@@ -104,6 +122,23 @@ class JerarquiaRolController extends Controller
             $response->setData($validator->errors());
             return response()->json($response, $response->getStatusCode());
         }
+
+        // --- Validación clave en actualización ---
+        $rol = Roles::find($request->id_rol);
+        $jefe = Roles::find($request->id_rol_superior);
+
+        if (!$rol || !$jefe) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Rol o jefe inmediato no encontrado para validación de niveles.');
+            return response()->json($response, $response->getStatusCode());
+        }
+
+        if ($jefe->nivel >= $rol->nivel) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('El jefe inmediato debe tener un nivel jerárquico superior (menor número) al rol.');
+            return response()->json($response, $response->getStatusCode());
+        }
+        // --- Fin validación niveles ---
 
         try {
             $jerarquiaRol = JerarquiaRol::find($id);

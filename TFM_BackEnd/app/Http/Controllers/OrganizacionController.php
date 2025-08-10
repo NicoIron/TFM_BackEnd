@@ -31,9 +31,11 @@ class OrganizacionController extends Controller
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_organizacion'     => 'required|string|max:50|unique:organizacion,id_organizacion',
-            'nombre_organizacion' => 'required|string|max:100',
-            'descripcion'         => 'nullable|string',
+            'id_organizacion'      => 'required|string|max:50|unique:organizacion,id_organizacion',
+            'nombre_organizacion'  => 'required|string|max:100|unique:organizacion,nombre_organizacion',
+            'descripcion'          => 'nullable|string',
+        ], [
+            'nombre_organizacion.unique' => 'El nombre de la organización ya existe.',
         ]);
 
         if ($validator->fails()) {
@@ -85,9 +87,11 @@ class OrganizacionController extends Controller
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_organizacion'     => 'sometimes|required|string|max:50|unique:organizacion,id_organizacion,' . $id,
-            'nombre_organizacion' => 'sometimes|required|string|max:100',
-            'descripcion'         => 'nullable|string',
+            'id_organizacion'      => 'sometimes|required|string|max:50|unique:organizacion,id_organizacion,' . $id,
+            'nombre_organizacion'  => 'sometimes|required|string|max:100|unique:organizacion,nombre_organizacion,' . $id,
+            'descripcion'          => 'nullable|string',
+        ], [
+            'nombre_organizacion.unique' => 'El nombre de la organización ya existe.',
         ]);
 
         if ($validator->fails()) {

@@ -6,29 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('jerarquia_roles', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->id();
             $table->unsignedBigInteger('id_jerarquia');
+            $table->foreign('id_jerarquia')->references('id')->on('jerarquia_inicial');
+
             $table->unsignedBigInteger('id_rol');
+            $table->foreign('id_rol')->references('id')->on('roles');
+
             $table->unsignedBigInteger('id_rol_superior')->nullable();
-            $table->foreign('id_jerarquia')
-                ->references('id')->on('jerarquia_inicial')
-                ->onDelete('restrict');
-            $table->foreign('id_rol')
-                ->references('id')->on('roles')
-                ->onDelete('restrict');
-            $table->foreign('id_rol_superior')
-                ->references('id')->on('roles')
-                ->onDelete('restrict');
+            $table->foreign('id_rol_superior')->references('id')->on('roles');
+
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('jerarquia_roles');
     }
 };
+

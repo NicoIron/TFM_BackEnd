@@ -3,66 +3,41 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tickets extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'tickets';
 
     protected $fillable = [
-          'id_organizacion',
         'id_ticket',
-        'id_rol',
+        'id_organizacion',
         'id_usuario',
         'id_tipo_producto',
         'monto',
         'proyecto',
-        'desc_compra',
-        'gestor',
-        'estado_solicitud',
-        'fecha_limite',
-        'num_ticket',
-        'eliminado',
+        'descr_compra',
+        'estado_ticket',
+        'fecha_cierre',
     ];
 
-
-    /**
-     * Relación inversa: El ticket pertenece a una organización.
-     */
+    // Relación con organización
     public function organizacion()
     {
-        return $this->belongsTo(Organizacion::class, 'id_organizacion');
+        return $this->belongsTo(Organizacion::class, 'id_organizacion', 'id_organizacion');
     }
 
-    /**
-     * Relación inversa: El ticket fue creado por un usuario.
-     */
+    // Relación con usuario
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class, 'id_usuario');
+        return $this->belongsTo(Usuario::class, 'id_usuario', 'id_usuario');
     }
 
-    /**
-     * Relación inversa: El ticket está asociado a un rol.
-     */
-    public function rol()
-    {
-        return $this->belongsTo(Roles::class, 'id_rol');
-    }
-
-    /**
-     * Relación inversa: El ticket pertenece a un tipo de producto.
-     */
+    // Relación con tipo producto
     public function tipoProducto()
     {
-        return $this->belongsTo(TiposProductos::class, 'id_tipo_producto');
+        return $this->belongsTo(TiposProductos::class, 'id_tipo_producto', 'id_producto');
     }
-
-    /**
-     * Relación uno a muchos: Un ticket tiene muchos logs.
-     */
-    public function logs()
-    {
-        return $this->hasMany(TicketsLogs::class, 'id_ticket');
-    }
-
 }

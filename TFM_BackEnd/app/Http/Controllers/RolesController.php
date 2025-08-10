@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Roles;
 use Illuminate\Http\Request;
 use App\Utils\ResultResponse;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 
 class RolesController extends Controller
@@ -16,12 +15,12 @@ class RolesController extends Controller
 
         try {
             $roles = Roles::with(['organizacion', 'jerarquia'])->get();
-            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-            $response->setMessage('Listado de roles');
             $response->setData($roles);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Lista de roles obtenida correctamente');
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
-            $response->setMessage('Error al obtener roles: ' . $e->getMessage());
+            $response->setMessage('Error al obtener la lista de roles: ' . $e->getMessage());
         }
 
         return response()->json($response, $response->getStatusCode());
@@ -32,11 +31,11 @@ class RolesController extends Controller
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_rol'         => 'required|string|max:50|unique:roles,id_rol',
-            'nombre_rol'     => 'required|string|max:100',
-            'jefe_inmediato' => 'nullable|string|max:100',
-            'id_organizacion'=> 'required|string|max:50|exists:organizacion,id_organizacion',
-            'id_jerarquia'   => 'required|integer|exists:jerarquia_inicial,id',
+            'id_rol'          => 'required|unique:roles,id_rol',
+            'nombre_rol'      => 'required|string|max:100',
+            'nivel'           => 'nullable|integer|min:1', // Nuevo campo para jerarquía
+            'id_organizacion' => 'required|exists:organizacion,id_organizacion',
+            'id_jerarquia'    => 'required|exists:jerarquia_inicial,id',
         ]);
 
         if ($validator->fails()) {
@@ -47,19 +46,23 @@ class RolesController extends Controller
         }
 
         try {
-            $role = Roles::create($validator->validated());
-            $response->setStatusCode(201);
+            $rol = Roles::create($request->only([
+                'id_rol',
+                'nombre_rol',
+                'nivel',
+                'id_organizacion',
+                'id_jerarquia',
+            ]));
+
+            $response->setData($rol);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Rol creado correctamente');
-            $response->setData($role);
-        } catch (QueryException $e) {
-            $response->setStatusCode(ResultResponse::ERROR_CONFLICT_CODE);
-            $response->setMessage('Conflicto al crear el rol: ' . $e->getMessage());
+            return response()->json($response, 201);
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
-            $response->setMessage('Error interno: ' . $e->getMessage());
+            $response->setMessage('Error al crear el rol: ' . $e->getMessage());
+            return response()->json($response, $response->getStatusCode());
         }
-
-        return response()->json($response, $response->getStatusCode());
     }
 
     public function ver($id)
@@ -67,17 +70,17 @@ class RolesController extends Controller
         $response = new ResultResponse();
 
         try {
-            $role = Roles::with(['organizacion', 'jerarquia'])->find($id);
+            $rol = Roles::with(['organizacion', 'jerarquia'])->find($id);
 
-            if (!$role) {
+            if (!$rol) {
                 $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
                 $response->setMessage('Rol no encontrado');
                 return response()->json($response, $response->getStatusCode());
             }
 
+            $response->setData($rol);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-            $response->setMessage('Rol encontrado');
-            $response->setData($role);
+            $response->setMessage('Rol obtenido correctamente');
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener el rol: ' . $e->getMessage());
@@ -90,19 +93,12 @@ class RolesController extends Controller
     {
         $response = new ResultResponse();
 
-        $role = Roles::find($id);
-        if (!$role) {
-            $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
-            $response->setMessage('Rol no encontrado');
-            return response()->json($response, $response->getStatusCode());
-        }
-
         $validator = Validator::make($request->all(), [
-            'id_rol'         => 'sometimes|string|max:50|unique:roles,id_rol,' . $id,
-            'nombre_rol'     => 'sometimes|string|max:100',
-            'jefe_inmediato' => 'nullable|string|max:100',
-            'id_organizacion'=> 'sometimes|string|max:50|exists:organizacion,id_organizacion',
-            'id_jerarquia'   => 'sometimes|integer|exists:jerarquia_inicial,id',
+            'id_rol'          => "required|unique:roles,id_rol,$id",
+            'nombre_rol'      => 'required|string|max:100',
+            'nivel'           => 'nullable|integer|min:1',
+            'id_organizacion' => 'required|exists:organizacion,id_organizacion',
+            'id_jerarquia'    => 'required|exists:jerarquia_inicial,id',
         ]);
 
         if ($validator->fails()) {
@@ -113,16 +109,28 @@ class RolesController extends Controller
         }
 
         try {
-            $role->update($validator->validated());
+            $rol = Roles::find($id);
+
+            if (!$rol) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage('Rol no encontrado');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            $rol->update($request->only([
+                'id_rol',
+                'nombre_rol',
+                'nivel',
+                'id_organizacion',
+                'id_jerarquia',
+            ]));
+
+            $response->setData($rol);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Rol actualizado correctamente');
-            $response->setData($role);
-        } catch (QueryException $e) {
-            $response->setStatusCode(ResultResponse::ERROR_CONFLICT_CODE);
-            $response->setMessage('Conflicto al actualizar el rol: ' . $e->getMessage());
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
-            $response->setMessage('Error interno: ' . $e->getMessage());
+            $response->setMessage('Error al actualizar el rol: ' . $e->getMessage());
         }
 
         return response()->json($response, $response->getStatusCode());
@@ -132,15 +140,16 @@ class RolesController extends Controller
     {
         $response = new ResultResponse();
 
-        $role = Roles::find($id);
-        if (!$role) {
-            $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
-            $response->setMessage('Rol no encontrado');
-            return response()->json($response, $response->getStatusCode());
-        }
-
         try {
-            $role->delete();
+            $rol = Roles::find($id);
+
+            if (!$rol) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage('Rol no encontrado');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            $rol->delete();
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Rol eliminado correctamente');
         } catch (\Exception $e) {
