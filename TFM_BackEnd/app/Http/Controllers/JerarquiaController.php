@@ -27,34 +27,48 @@ class JerarquiaController extends Controller
         return response()->json($response);
     }
 
-    public function guardar(Request $request)
-    {
-        $response = new ResultResponse();
+public function guardar(Request $request)
+{
+    $response = new ResultResponse();
 
-        $validator = Validator::make($request->all(), [
-            'id_jerarquia'    => 'required|integer',
-            'id_organizacion' => 'required|integer|exists:organizacion,id_organizacion',
-            'cargo'           => 'required|string|max:255',
-        ]);
+    $validator = Validator::make($request->all(), [
+        'id_jerarquia'    => 'required|integer',
+        'id_organizacion' => 'required|integer|exists:organizacion,id_organizacion',
+        'cargo'           => 'required|string|max:255',
+    ]);
 
-        if ($validator->fails()) {
-            $response->setMessage($validator->errors()->first());
-            return response()->json($response);
-        }
-
-        try {
-            $jerarquia = JerarquiaInicial::create($request->all());
-
-            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-            $response->setMessage(ResultResponse::TXT_SUCCESS_CODE);
-            $response->setData($jerarquia);
-        } catch (\Exception $e) {
-            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
-            $response->setMessage($e->getMessage());
-        }
-
-        return response()->json($response);
+    if ($validator->fails()) {
+        $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+        $response->setMessage($validator->errors()->first());
+        return response()->json($response, ResultResponse::ERROR_VALIDATION_CODE);
     }
+
+    try {
+        $jerarquia = JerarquiaInicial::create($request->all());
+
+        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+        $response->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+        $response->setData($jerarquia);
+
+        return response()->json($response, ResultResponse::SUCCESS_CODE);
+    } catch (\Illuminate\Database\QueryException $e) {
+        // Detectar error de duplicidad
+        if ($e->getCode() === '23505') {
+            $response->setStatusCode(ResultResponse::ERROR_CONFLICT_CODE);
+            $response->setMessage('Ya existe un registro con ese id_jerarquia.');
+            return response()->json($response, ResultResponse::ERROR_CONFLICT_CODE);
+        }
+
+        $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+        $response->setMessage($e->getMessage());
+        return response()->json($response, ResultResponse::ERROR_INTERNAL_SERVER);
+    } catch (\Exception $e) {
+        $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+        $response->setMessage($e->getMessage());
+        return response()->json($response, ResultResponse::ERROR_INTERNAL_SERVER);
+    }
+}
+
 
     public function ver($id)
     {

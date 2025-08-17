@@ -12,12 +12,16 @@ use Illuminate\Database\QueryException;
 
 class UsuarioController extends Controller
 {
+    /**
+     *  Listar todos los usuarios con sus relaciones (rol, organización y jerarquía).
+     */
     public function listar()
     {
         $response = new ResultResponse();
 
         try {
             $usuarios = Usuario::with(['rol', 'organizacion', 'jerarquia'])->get();
+
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Listado de usuarios obtenido correctamente');
             $response->setData($usuarios);
@@ -29,10 +33,18 @@ class UsuarioController extends Controller
         return response()->json($response, $response->getStatusCode());
     }
 
+    /**
+     *  Guardar un nuevo usuario validando:
+     *  - Datos obligatorios
+     *  - Que el rol y la jerarquía existan
+     *  - Que el rol y la jerarquía coincidan por nombre
+     *  - Que el nivel del rol coincida con el nivel de la jerarquía
+     */
     public function guardar(Request $request)
     {
         $response = new ResultResponse();
 
+        //  Validaciones de los campos obligatorios
         $validator = Validator::make($request->all(), [
             'id_usuario'      => 'required|string|max:50|unique:usuarios,id_usuario',
             'nombre'          => 'required|string|max:100',
@@ -52,8 +64,7 @@ class UsuarioController extends Controller
             return response()->json($response, $response->getStatusCode());
         }
 
-        // Validación extra para asegurar que id_rol y id_jerarquia correspondan
-        // Esto evita inconsistencias entre el rol asignado y la jerarquía del usuario
+        //  Validar existencia de rol y jerarquía
         $rol = Roles::find($request->id_rol);
         $jerarquia = JerarquiaInicial::find($request->id_jerarquia);
 
@@ -63,18 +74,28 @@ class UsuarioController extends Controller
             return response()->json($response, $response->getStatusCode());
         }
 
-        // Validación que el nombre del rol coincida con el cargo de la jerarquía
+        //  Validar que el nombre del rol coincida con el cargo de la jerarquía
         if (strcasecmp($rol->nombre_rol, $jerarquia->cargo) !== 0) {
             $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
             $response->setMessage('El rol y la jerarquía asignados no coinciden.');
             return response()->json($response, $response->getStatusCode());
         }
 
+        //  Validar que el nivel del rol coincida con el nivel de la jerarquía
+        if ($rol->nivel !== $jerarquia->nivel) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('El nivel del rol no corresponde con el nivel de la jerarquía.');
+            return response()->json($response, $response->getStatusCode());
+        }
+
+        //  Crear usuario
         try {
             $usuario = Usuario::create($request->all());
+
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Usuario creado correctamente');
             $response->setData($usuario);
+
             return response()->json($response, 201);
         } catch (QueryException $e) {
             $response->setStatusCode(ResultResponse::ERROR_CONFLICT_CODE);
@@ -87,6 +108,9 @@ class UsuarioController extends Controller
         return response()->json($response, $response->getStatusCode());
     }
 
+    /**
+     *  Ver un usuario por su ID
+     */
     public function ver($id)
     {
         $response = new ResultResponse();
@@ -111,10 +135,18 @@ class UsuarioController extends Controller
         return response()->json($response, $response->getStatusCode());
     }
 
+    /**
+     *  Actualizar un usuario validando:
+     *  - Campos opcionales
+     *  - Que rol y jerarquía existan (si se envían)
+     *  - Que el rol y la jerarquía coincidan por nombre
+     *  - Que el nivel del rol coincida con el nivel de la jerarquía
+     */
     public function actualizar(Request $request, $id)
     {
         $response = new ResultResponse();
 
+        // ✅ Validaciones de campos opcionales
         $validator = Validator::make($request->all(), [
             'id_usuario'      => 'sometimes|string|max:50|unique:usuarios,id_usuario,' . $id,
             'nombre'          => 'sometimes|string|max:100',
@@ -143,7 +175,7 @@ class UsuarioController extends Controller
                 return response()->json($response, $response->getStatusCode());
             }
 
-            // Si actualizan id_rol o id_jerarquia, validar que coincidan
+            // Validar rol y jerarquía SOLO si alguno se está actualizando
             if ($request->has('id_rol') || $request->has('id_jerarquia')) {
                 $rolId = $request->get('id_rol', $usuario->id_rol);
                 $jerarquiaId = $request->get('id_jerarquia', $usuario->id_jerarquia);
@@ -162,9 +194,17 @@ class UsuarioController extends Controller
                     $response->setMessage('El rol y la jerarquía asignados no coinciden.');
                     return response()->json($response, $response->getStatusCode());
                 }
+
+                if ($rol->nivel !== $jerarquia->nivel) {
+                    $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                    $response->setMessage('El nivel del rol no corresponde con el nivel de la jerarquía.');
+                    return response()->json($response, $response->getStatusCode());
+                }
             }
 
+            // Actualizar usuario
             $usuario->update($request->all());
+
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Usuario actualizado correctamente');
             $response->setData($usuario);
@@ -179,6 +219,9 @@ class UsuarioController extends Controller
         return response()->json($response, $response->getStatusCode());
     }
 
+    /**
+     *  Eliminar un usuario por su ID
+     */
     public function eliminar($id)
     {
         $response = new ResultResponse();
@@ -193,6 +236,7 @@ class UsuarioController extends Controller
             }
 
             $usuario->delete();
+
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Usuario eliminado correctamente');
         } catch (\Exception $e) {
