@@ -31,20 +31,42 @@ class JerarquiaRolController extends Controller
     }
 
     // Método para guardar una nueva relación de jerarquía y rol
+    // Método para guardar una nueva relación de jerarquía y rol
     public function guardar(Request $request)
     {
         $response = new ResultResponse();
 
-        // Validación de datos de entrada
-        $validator = Validator::make($request->all(), [
-            'id_jerarquia'    => 'required|exists:jerarquia_inicial,id',
-            'id_rol'          => 'required|exists:roles,id|different:id_rol_superior',
-            'id_rol_superior' => 'required|exists:roles,id|different:id_rol',
-        ], [
-            'id_rol.different' => 'El rol y el rol superior no pueden ser el mismo.',
-            'id_rol_superior.required' => 'El rol superior es obligatorio.',
-            'id_rol_superior.different' => 'El rol superior debe ser diferente al rol.',
-        ]);
+        // PRIMERO obtener el rol para saber si es Comité Operativo
+        $rol = Roles::find($request->id_rol);
+
+        if (!$rol) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Rol no encontrado.');
+            return response()->json($response, $response->getStatusCode());
+        }
+
+        // Validación CONDICIONAL de datos de entrada
+        if ($rol->nombre_rol === "Comite Operativo") {
+            // Para Comité Operativo: no requiere rol superior
+            $validator = Validator::make($request->all(), [
+                'id_jerarquia'    => 'required|exists:jerarquia_inicial,id',
+                'id_rol'          => 'required|exists:roles,id',
+                'id_rol_superior' => 'nullable|different:id_rol', // nullable en lugar de required
+            ], [
+                'id_rol_superior.different' => 'El rol superior debe ser diferente al rol.',
+            ]);
+        } else {
+            // Para otros roles: validación original
+            $validator = Validator::make($request->all(), [
+                'id_jerarquia'    => 'required|exists:jerarquia_inicial,id',
+                'id_rol'          => 'required|exists:roles,id|different:id_rol_superior',
+                'id_rol_superior' => 'required|exists:roles,id|different:id_rol',
+            ], [
+                'id_rol.different' => 'El rol y el rol superior no pueden ser el mismo.',
+                'id_rol_superior.required' => 'El rol superior es obligatorio.',
+                'id_rol_superior.different' => 'El rol superior debe ser diferente al rol.',
+            ]);
+        }
 
         if ($validator->fails()) {
             // Si la validación falla, se devuelve error con detalles
@@ -55,26 +77,33 @@ class JerarquiaRolController extends Controller
         }
 
         // --- Validación de jerarquía ---
-        // Se busca el rol y su jefe inmediato
-        $rol = Roles::find($request->id_rol);
-        $rolSuperior  = Roles::find($request->id_rol_superior);
+        // Para Comité Operativo, saltar validación de niveles
+        if ($rol->nombre_rol !== "Comite Operativo") {
+            // Se busca el jefe inmediato (solo para roles que no son Comité Operativo)
+            $rolSuperior = Roles::find($request->id_rol_superior);
 
-        // Verificar que existan en BD
-        if (!$rol || !$rolSuperior ) {
-            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-            $response->setMessage('Rol o jefe inmediato no encontrado para validación de niveles.');
-            return response()->json($response, $response->getStatusCode());
-        }
+            // Verificar que exista en BD
+            if (!$rolSuperior) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('Jefe inmediato no encontrado para validación de niveles.');
+                return response()->json($response, $response->getStatusCode());
+            }
 
-        // Validación clave: el jefe inmediato debe tener un nivel más alto (menor número)
-        if ($rolSuperior ->nivel >= $rol->nivel) {
-            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-            $response->setMessage('El jefe inmediato debe tener un nivel jerárquico superior (menor número) al rol.');
-            return response()->json($response, $response->getStatusCode());
+            // Validación clave: el jefe inmediato debe tener un nivel más alto (menor número)
+            if ($rolSuperior->nivel >= $rol->nivel) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('El jefe inmediato debe tener un nivel jerárquico superior (menor número) al rol.');
+                return response()->json($response, $response->getStatusCode());
+            }
         }
         // --- Fin validación niveles ---
 
         try {
+            // Para Comité Operativo, forzar id_rol_superior a null
+            if ($rol->nombre_rol === "Comite Operativo") {
+                $request->merge(['id_rol_superior' => null]);
+            }
+
             // Se guarda el registro
             $jerarquiaRol = JerarquiaRol::create($request->all());
             $response->setData($jerarquiaRol);
