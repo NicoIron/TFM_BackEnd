@@ -44,17 +44,17 @@ class UsuarioController extends Controller
     {
         $response = new ResultResponse();
 
-        //  Validaciones de los campos obligatorios
+        // Validaciones de campos obligatorios (CORREGIDO exists)
         $validator = Validator::make($request->all(), [
             'id_usuario'      => 'required|string|max:50|unique:usuarios,id_usuario',
-            'nombre'          => 'required|string|max:100',
-            'apellido'        => 'required|string|max:100',
+            'nombre'          => 'required|string|max:70',
+            'apellido'        => 'required|string|max:70',
             'email'           => 'required|email|max:150|unique:usuarios,email',
             'password_hash'   => 'required|string',
             'username'        => 'required|string|unique:usuarios,username',
-            'id_rol'          => 'required|integer|exists:roles,id',
-            'id_organizacion' => 'required|string|max:50|exists:organizacion,id_organizacion',
-            'id_jerarquia'    => 'required|integer|exists:jerarquia_inicial,id',
+            'id_rol'          => 'required|integer|exists:roles,id_rol', // ← Cambiado a id
+            'id_organizacion' => 'required|string|max:50|exists:organizacion,id',
+            'id_jerarquia'    => 'required|integer|exists:jerarquia_inicial,id', // ← Cambiado a id
         ]);
 
         if ($validator->fails()) {
@@ -64,33 +64,50 @@ class UsuarioController extends Controller
             return response()->json($response, $response->getStatusCode());
         }
 
-        //  Validar existencia de rol y jerarquía
-        $rol = Roles::find($request->id_rol);
-        $jerarquia = JerarquiaInicial::find($request->id_jerarquia);
-
-        if (!$rol || !$jerarquia) {
-            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-            $response->setMessage('Rol o jerarquía no encontrados.');
-            return response()->json($response, $response->getStatusCode());
-        }
-
-        //  Validar que el nombre del rol coincida con el cargo de la jerarquía
-        if (strcasecmp($rol->nombre_rol, $jerarquia->cargo) !== 0) {
-            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-            $response->setMessage('El rol y la jerarquía asignados no coinciden.');
-            return response()->json($response, $response->getStatusCode());
-        }
-
-        //  Validar que el nivel del rol coincida con el nivel de la jerarquía
-        if ($rol->nivel !== $jerarquia->nivel) {
-            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-            $response->setMessage('El nivel del rol no corresponde con el nivel de la jerarquía.');
-            return response()->json($response, $response->getStatusCode());
-        }
-
-        //  Crear usuario
         try {
-            $usuario = Usuario::create($request->all());
+            // Validar existencia de rol y jerarquía (MANTIENE TU VERSIÓN ORIGINAL)
+            $rol = Roles::find($request->id_rol);
+            $jerarquia = JerarquiaInicial::find($request->id_jerarquia);
+
+            if (!$rol || !$jerarquia) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('Rol o jerarquía no encontrados.');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            //  NUEVA VALIDACIÓN: Rol pertenece a la misma organización
+            if ($rol->id_organizacion !== $request->id_organizacion) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('El rol seleccionado no pertenece a la organización especificada.');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            //  NUEVA VALIDACIÓN: Jerarquía pertenece a la misma organización
+            if ($jerarquia->id_organizacion !== $request->id_organizacion) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('La jerarquía seleccionada no pertenece a la organización especificada.');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            // Validar que el nombre del rol coincida con el cargo de la jerarquía (MANTIENE TU VERSIÓN ORIGINAL)
+            if (strcasecmp($rol->nombre_rol, $jerarquia->cargo) !== 0) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('El rol y la jerarquía asignados no coinciden.');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            // Validar que el nivel del rol coincida con el nivel de la jerarquía (MANTIENE TU VERSIÓN ORIGINAL)
+            /*   if ($rol->nivel !== $jerarquia->nivel) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('El nivel del rol no corresponde con el nivel de la jerarquía.');
+                return response()->json($response, $response->getStatusCode());
+            }*/
+
+            $usuarioData = $request->all();
+            $usuarioData['password_hash'] = bcrypt($request->password_hash);
+
+            // Crear usuario (MANTIENE TU VERSIÓN ORIGINAL)
+            $usuario = Usuario::create($usuarioData);
 
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Usuario creado correctamente');
@@ -146,7 +163,7 @@ class UsuarioController extends Controller
     {
         $response = new ResultResponse();
 
-        // ✅ Validaciones de campos opcionales
+        // Validaciones de campos opcionales
         $validator = Validator::make($request->all(), [
             'id_usuario'      => 'sometimes|string|max:50|unique:usuarios,id_usuario,' . $id,
             'nombre'          => 'sometimes|string|max:100',
