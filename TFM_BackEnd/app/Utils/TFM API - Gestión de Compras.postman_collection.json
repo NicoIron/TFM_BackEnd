@@ -1,0 +1,1403 @@
+{
+	"info": {
+		"_postman_id": "bd416b59-d7db-48c6-b8dc-946e4c315e19",
+		"name": "TFM API - Gestión de Compras",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "12094949",
+		"_collection_link": "https://universal-meadow-764090.postman.co/workspace/Universidad_VIU~1c632fb0-98e6-4886-9965-b36ea91d609e/collection/12094949-bd416b59-d7db-48c6-b8dc-946e4c315e19?action=share&source=collection_link&creator=12094949"
+	},
+	"item": [
+		{
+			"name": "Organizaciones",
+			"item": [
+				{
+					"name": "Listar Organizaciones",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "http://localhost/api/organizaciones"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Organizaciones",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id_organizacion\":\"1\",\n    \"nombre_organizacion\": \"Venta Repuestos SAS\",\n    \"descripcion\": \"Organizacion 1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/organizaciones"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Organizaciones",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "http://localhost/api/organizaciones/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Organizaciones",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/organizaciones/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Organizaciones",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "http://localhost/api/organizaciones/"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jerarquías",
+			"item": [
+				{
+					"name": "Listar Jerarquías",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "http://localhost/api/jerarquia-inicial"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Jerarquías",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// ==========================\r",
+									"// 📌 PRE-REQUEST SCRIPT (VERSIÓN FINAL)\r",
+									"// ==========================\r",
+									"\r",
+									"if (!pm.environment.get(\"rolesIniciales\")) {\r",
+									"    // Solo 1 jerarquía para evitar duplicados\r",
+									"    let numJerarquias = 1;\r",
+									"    \r",
+									"    let cargos = [\r",
+									"        \"Comite Operativo\",\r",
+									"        \"Jefe TI\",\r",
+									"        \"Lider de clan Infraestructura\",\r",
+									"        \"Lider de clan Developer\",\r",
+									"        \"Lider de clan IA\",\r",
+									"        \"Lider de clan Calidad\",\r",
+									"        \"Lider de clan Customer Service\",\r",
+									"        \"Gerente de Proyecto\",\r",
+									"        \"Lider Tecnico\",\r",
+									"        \"Lider Qa\",\r",
+									"        \"Lider funcional\",\r",
+									"        \"Developer\",\r",
+									"        \"Automatizador\",\r",
+									"        \"Funcional\",\r",
+									"        \"Scrum\" // Este será el último cargo\r",
+									"    ];\r",
+									"\r",
+									"    let rolesIniciales = [];\r",
+									"    cargos.forEach((cargo, index) => {\r",
+									"        rolesIniciales.push({\r",
+									"            id_jerarquia: 100 + index, // IDs únicos secuenciales\r",
+									"            id_organizacion: 1,\r",
+									"            cargo: cargo\r",
+									"        });\r",
+									"    });\r",
+									"\r",
+									"    pm.environment.set(\"rolesIniciales\", JSON.stringify(rolesIniciales));\r",
+									"    pm.environment.set(\"currentIndex\", 0);\r",
+									"    console.log(\"⚙️ Inicializado con \" + rolesIniciales.length + \" roles únicos\");\r",
+									"}\r",
+									"\r",
+									"// Configurar request actual\r",
+									"const roles = JSON.parse(pm.environment.get(\"rolesIniciales\"));\r",
+									"const currentIndex = parseInt(pm.environment.get(\"currentIndex\"));\r",
+									"const currentRole = roles[currentIndex];\r",
+									"\r",
+									"console.log(`📤 Enviando: ${currentRole.cargo} (ID: ${currentRole.id_jerarquia})`);\r",
+									"\r",
+									"pm.environment.set(\"Var_id\", currentRole.id_jerarquia);\r",
+									"pm.environment.set(\"Var_cargo\", currentRole.cargo);\r",
+									"pm.environment.set(\"Var_id_org\", currentRole.id_organizacion);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// ==========================\r",
+									"// 📌 POST-RESPONSE SCRIPT (VERSIÓN FINAL)\r",
+									"// ==========================\r",
+									"\r",
+									"try {\r",
+									"    const roles = JSON.parse(pm.environment.get(\"rolesIniciales\"));\r",
+									"    let currentIndex = parseInt(pm.environment.get(\"currentIndex\"));\r",
+									"    const currentRole = roles[currentIndex];\r",
+									"    \r",
+									"    console.log(`✅ Procesado: ${currentRole.cargo} | Status: ${pm.response.code}`);\r",
+									"\r",
+									"    // Verificar si es el último cargo (\"Scrum\")\r",
+									"    if (currentRole.cargo === \"Scrum\") {\r",
+									"        console.log(\"🏁 Todos los cargos procesados correctamente (1 vez cada uno)\");\r",
+									"        pm.environment.unset(\"currentIndex\");\r",
+									"        pm.environment.unset(\"rolesIniciales\");\r",
+									"        pm.execution.setNextRequest(null);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    // Avanzar al siguiente cargo\r",
+									"    currentIndex++;\r",
+									"    pm.environment.set(\"currentIndex\", currentIndex);\r",
+									"\r",
+									"    // Configurar próximo request\r",
+									"    const nextRole = roles[currentIndex];\r",
+									"    console.log(`⏭ Próximo: ${nextRole.cargo}`);\r",
+									"    \r",
+									"    pm.environment.set(\"Var_id\", nextRole.id_jerarquia);\r",
+									"    pm.environment.set(\"Var_cargo\", nextRole.cargo);\r",
+									"    pm.environment.set(\"Var_id_org\", nextRole.id_organizacion);\r",
+									"    \r",
+									"    // Continuar con el siguiente request\r",
+									"    pm.execution.setNextRequest(pm.info.requestName);\r",
+									"\r",
+									"} catch (error) {\r",
+									"    console.error(\"⚠️ Error:\", error);\r",
+									"    pm.execution.setNextRequest(pm.info.requestName);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true,
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id_jerarquia\": {{Var_id}},\n    \"id_organizacion\": {{Var_id_org}},\n    \"cargo\": \"{{Var_cargo}}\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/jerarquia-inicial"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Jerarquías",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "http://localhost/api/jerarquias/8"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Jerarquías",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/jerarquias/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Jerarquías",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost/api/jerarquia-inicial/77"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles",
+			"item": [
+				{
+					"name": "Listar Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost/api/roles"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Roles",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// ==========================\r",
+									"// 📌 PRE-REQUEST SCRIPT PARA ROLES\r",
+									"// ==========================\r",
+									"\r",
+									"// Limpiar variables previas para evitar conflictos\r",
+									"if (pm.environment.get(\"rolesData\") && parseInt(pm.environment.get(\"currentRoleIndex\")) >= 15) {\r",
+									"    pm.environment.unset(\"rolesData\");\r",
+									"    pm.environment.unset(\"currentRoleIndex\");\r",
+									"    console.log(\"🔄 Reiniciando variables para roles...\");\r",
+									"}\r",
+									"\r",
+									"if (!pm.environment.get(\"rolesData\")) {\r",
+									"    // Datos ordenados de ROLES (estructura diferente a jerarquia_inicial)\r",
+									"    const rolesData = [\r",
+									"        {\"id_rol\":1,\"nombre_rol\":\"Comite Operativo\",\"nivel\":1,\"id_organizacion\":1,\"id_jerarquia\":1},\r",
+									"        {\"id_rol\":2,\"nombre_rol\":\"Jefe TI\",\"nivel\":2,\"id_organizacion\":1,\"id_jerarquia\":2},\r",
+									"        {\"id_rol\":3,\"nombre_rol\":\"Lider de clan Infraestructura\",\"nivel\":3,\"id_organizacion\":1,\"id_jerarquia\":3},\r",
+									"        {\"id_rol\":4,\"nombre_rol\":\"Lider de clan Developer\",\"nivel\":3,\"id_organizacion\":1,\"id_jerarquia\":4},\r",
+									"        {\"id_rol\":5,\"nombre_rol\":\"Lider de clan IA\",\"nivel\":3,\"id_organizacion\":1,\"id_jerarquia\":5},\r",
+									"        {\"id_rol\":6,\"nombre_rol\":\"Lider de clan Calidad\",\"nivel\":3,\"id_organizacion\":1,\"id_jerarquia\":6},\r",
+									"        {\"id_rol\":7,\"nombre_rol\":\"Lider de clan Customer Service\",\"nivel\":3,\"id_organizacion\":1,\"id_jerarquia\":7},\r",
+									"        {\"id_rol\":8,\"nombre_rol\":\"Gerente de Proyecto\",\"nivel\":3,\"id_organizacion\":1,\"id_jerarquia\":8},\r",
+									"        {\"id_rol\":9,\"nombre_rol\":\"Lider Tecnico\",\"nivel\":4,\"id_organizacion\":1,\"id_jerarquia\":9},\r",
+									"        {\"id_rol\":10,\"nombre_rol\":\"Lider Qa\",\"nivel\":4,\"id_organizacion\":1,\"id_jerarquia\":10},\r",
+									"        {\"id_rol\":11,\"nombre_rol\":\"Lider funcional\",\"nivel\":4,\"id_organizacion\":1,\"id_jerarquia\":11},\r",
+									"        {\"id_rol\":12,\"nombre_rol\":\"Developer\",\"nivel\":5,\"id_organizacion\":1,\"id_jerarquia\":12},\r",
+									"        {\"id_rol\":13,\"nombre_rol\":\"Automatizador\",\"nivel\":5,\"id_organizacion\":1,\"id_jerarquia\":13},\r",
+									"        {\"id_rol\":14,\"nombre_rol\":\"Funcional\",\"nivel\":5,\"id_organizacion\":1,\"id_jerarquia\":14},\r",
+									"        {\"id_rol\":15,\"nombre_rol\":\"Scrum\",\"nivel\":5,\"id_organizacion\":1,\"id_jerarquia\":15}\r",
+									"    ];\r",
+									"\r",
+									"    pm.environment.set(\"rolesData\", JSON.stringify(rolesData));\r",
+									"    pm.environment.set(\"currentRoleIndex\", 0);\r",
+									"    console.log(\"⚙️ Inicializado con \" + rolesData.length + \" roles\");\r",
+									"}\r",
+									"\r",
+									"// Configurar request actual\r",
+									"const roles = JSON.parse(pm.environment.get(\"rolesData\"));\r",
+									"const currentIndex = parseInt(pm.environment.get(\"currentRoleIndex\"));\r",
+									"const currentRole = roles[currentIndex];\r",
+									"\r",
+									"console.log(`📤 Enviando rol ${currentIndex + 1}/15: ${currentRole.nombre_rol}`);\r",
+									"\r",
+									"// Setear variables para el body de ROLES\r",
+									"pm.environment.set(\"Var_id_rol\", currentRole.id_rol);\r",
+									"pm.environment.set(\"Var_nombre_rol\", currentRole.nombre_rol);\r",
+									"pm.environment.set(\"Var_nivel\", currentRole.nivel);\r",
+									"pm.environment.set(\"Var_id_organizacion\", currentRole.id_organizacion);\r",
+									"pm.environment.set(\"Var_id_jerarquia\", currentRole.id_jerarquia);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// ==========================",
+									"// 📌 POST-RESPONSE SCRIPT PARA ROLES",
+									"// ==========================",
+									"",
+									"try {",
+									"    const roles = JSON.parse(pm.environment.get(\"rolesData\"));",
+									"    let currentIndex = parseInt(pm.environment.get(\"currentRoleIndex\"));",
+									"    const currentRole = roles[currentIndex];",
+									"    ",
+									"    console.log(`✅ Procesado: ${currentRole.nombre_rol} | Status: ${pm.response.code}`);",
+									"",
+									"    // Verificar si es el último rol (por índice, no por nombre)",
+									"    if (currentIndex === roles.length - 1) {",
+									"        console.log(\"🏁 Todos los ROLES procesados correctamente\");",
+									"        pm.environment.unset(\"currentRoleIndex\");",
+									"        pm.environment.unset(\"rolesData\");",
+									"        pm.execution.setNextRequest(null);",
+									"        return;",
+									"    }",
+									"",
+									"    // Avanzar al siguiente rol",
+									"    currentIndex++;",
+									"    pm.environment.set(\"currentRoleIndex\", currentIndex);",
+									"",
+									"    // Configurar próximo request",
+									"    const nextRole = roles[currentIndex];",
+									"    console.log(`⏭ Próximo rol: ${nextRole.nombre_rol}`);",
+									"    ",
+									"    // Setear variables para el próximo request de ROLES",
+									"    pm.environment.set(\"Var_id_rol\", nextRole.id_rol);",
+									"    pm.environment.set(\"Var_nombre_rol\", nextRole.nombre_rol);",
+									"    pm.environment.set(\"Var_nivel\", nextRole.nivel);",
+									"    pm.environment.set(\"Var_id_organizacion\", nextRole.id_organizacion);",
+									"    pm.environment.set(\"Var_id_jerarquia\", nextRole.id_jerarquia);",
+									"    ",
+									"    // Continuar con el siguiente request",
+									"    pm.execution.setNextRequest(pm.info.requestName);",
+									"",
+									"} catch (error) {",
+									"    console.error(\"⚠️ Error:\", error);",
+									"    pm.execution.setNextRequest(pm.info.requestName);  ",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id_rol\": {{Var_id_rol}},\n    \"nombre_rol\": \"{{Var_nombre_rol}}\",\n    \"nivel\": {{Var_nivel}},\n    \"id_organizacion\": {{Var_id_organizacion}},\n    \"id_jerarquia\": {{Var_id_jerarquia}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/roles"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost/api/roles/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Roles",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/roles/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Roles",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost/api/roles/5"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jerarquiq-Roles",
+			"item": [
+				{
+					"name": "Listar Jerarquia-Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost/api/jerarquia-roles/listarJerarquiaRol"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver jerarquia-roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost/api/jerarquia-roles/verJerarquiaRol/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Jerarquia-roles",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Datos de la jerarquía de roles - CORREGIDO\r",
+									"const jerarquiaData = [\r",
+									"  {\r",
+									"    \"id_jerarquia\": 1,          // PK de jerarquia_roles\r",
+									"    \"id_rol\": 1,                // \"Comite Operativo\" en tabla roles\r",
+									"    \"id_rol_superior\": null,    // No tiene superior, es el nivel más alto\r",
+									"    \"resumen\": \"Comite Operativo: nivel 1, no depende de ningún rol.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 2,          // PK de jerarquia_roles\r",
+									"    \"id_rol\": 2,                // \"Jefe TI\" en tabla roles\r",
+									"    \"id_rol_superior\": 1,       // \"Comite Operativo\" en tabla roles\r",
+									"    \"resumen\": \"Jefe TI: nivel 2, depende directamente del Comite Operativo.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 3,\r",
+									"    \"id_rol\": 3,                // \"Lider de clan Infraestructura\"\r",
+									"    \"id_rol_superior\": 2,       // \"Jefe TI\"\r",
+									"    \"resumen\": \"Lider de clan Infraestructura: nivel 3, depende de Jefe TI.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 4,\r",
+									"    \"id_rol\": 4,                // \"Lider de clan Developer\"\r",
+									"    \"id_rol_superior\": 2,       // \"Jefe TI\"\r",
+									"    \"resumen\": \"Lider de clan Developer: nivel 3, depende de Jefe TI.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 5,\r",
+									"    \"id_rol\": 5,                // \"Lider de clan IA\"\r",
+									"    \"id_rol_superior\": 2,       // \"Jefe TI\"\r",
+									"    \"resumen\": \"Lider de clan IA: nivel 3, depende de Jefe TI.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 6,\r",
+									"    \"id_rol\": 6,                // \"Lider de clan Calidad\"\r",
+									"    \"id_rol_superior\": 2,       // \"Jefe TI\"\r",
+									"    \"resumen\": \"Lider de clan Calidad: nivel 3, depende de Jefe TI.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 7,\r",
+									"    \"id_rol\": 7,                // \"Lider de clan Customer Service\"\r",
+									"    \"id_rol_superior\": 2,       // \"Jefe TI\"\r",
+									"    \"resumen\": \"Lider de clan Customer Service: nivel 3, depende de Jefe TI.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 8,\r",
+									"    \"id_rol\": 8,                // \"Gerente de Proyecto\"\r",
+									"    \"id_rol_superior\": 1,       // \"Comite Operativo\"\r",
+									"    \"resumen\": \"Gerente de Proyecto: nivel 3, depende directamente del Comite Operativo.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 9,\r",
+									"    \"id_rol\": 9,                // \"Lider Tecnico\"\r",
+									"    \"id_rol_superior\": 8,       // \"Gerente de Proyecto\"\r",
+									"    \"resumen\": \"Lider Tecnico: nivel 4, depende de Gerente de Proyecto.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 10,\r",
+									"    \"id_rol\": 10,               // \"Lider Qa\"\r",
+									"    \"id_rol_superior\": 8,       // \"Gerente de Proyecto\"\r",
+									"    \"resumen\": \"Lider Qa: nivel 4, depende de Gerente de Proyecto.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 11,\r",
+									"    \"id_rol\": 11,               // \"Lider funcional\"\r",
+									"    \"id_rol_superior\": 8,       // \"Gerente de Proyecto\"\r",
+									"    \"resumen\": \"Lider funcional: nivel 4, depende de Gerente de Proyecto.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 12,\r",
+									"    \"id_rol\": 12,               // \"Developer\"\r",
+									"    \"id_rol_superior\": 4,       // \"Lider de clan Developer\"\r",
+									"    \"resumen\": \"Developer: nivel 5, depende de Lider de clan Developer.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 13,\r",
+									"    \"id_rol\": 13,               // \"Automatizador\"\r",
+									"    \"id_rol_superior\": 4,       // \"Lider de clan Developer\"\r",
+									"    \"resumen\": \"Automatizador: nivel 5, depende de Lider de clan Developer.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 14,\r",
+									"    \"id_rol\": 14,               // \"Funcional\"\r",
+									"    \"id_rol_superior\": 11,      // \"Lider funcional\"\r",
+									"    \"resumen\": \"Funcional: nivel 5, depende de Lider funcional.\"\r",
+									"  },\r",
+									"  {\r",
+									"    \"id_jerarquia\": 15,\r",
+									"    \"id_rol\": 15,               // \"Scrum\"\r",
+									"    \"id_rol_superior\": 11,      // \"Lider funcional\"\r",
+									"    \"resumen\": \"Scrum: nivel 5, depende de Lider funcional.\"\r",
+									"  }\r",
+									"];\r",
+									"\r",
+									"// Obtener índice actual de jerarquía\r",
+									"let currentIndex = parseInt(pm.collectionVariables.get(\"current_jerarquia_index\") || 0);\r",
+									"\r",
+									"console.log(\"📊 Current jerarquia index: \" + currentIndex);\r",
+									"\r",
+									"// Verificar si todavía hay datos por procesar\r",
+									"if (currentIndex < jerarquiaData.length) {\r",
+									"    const currentJerarquia = jerarquiaData[currentIndex];\r",
+									"    \r",
+									"    // Establecer variables de collection (globales) para esta iteración\r",
+									"    pm.collectionVariables.set(\"id_jerarquia\", currentJerarquia.id_jerarquia);\r",
+									"    pm.collectionVariables.set(\"id_rol\", currentJerarquia.id_rol);\r",
+									"    pm.collectionVariables.set(\"id_rol_superior\", currentJerarquia.id_rol_superior);\r",
+									"    pm.collectionVariables.set(\"resumen\", currentJerarquia.resumen);\r",
+									"    \r",
+									"    // Incrementar índice para la próxima ejecución\r",
+									"    pm.collectionVariables.set(\"current_jerarquia_index\", currentIndex + 1);\r",
+									"    \r",
+									"    // Log informativo con detalles\r",
+									"    console.log(\"🔄 Preparando jerarquía: \" + currentJerarquia.resumen);\r",
+									"    console.log(\"   - id_jerarquia: \" + currentJerarquia.id_jerarquia);\r",
+									"    console.log(\"   - id_rol: \" + currentJerarquia.id_rol);\r",
+									"    console.log(\"   - id_rol_superior: \" + currentJerarquia.id_rol_superior);\r",
+									"    \r",
+									"} else {\r",
+									"    console.log(\"✅ Todas las jerarquías han sido procesadas\");\r",
+									"    pm.execution.setNextRequest(null); // Detener la ejecución\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Verificar respuesta del servidor",
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    console.log(\"✅ Jerarquía creada exitosamente: \" + pm.collectionVariables.get(\"resumen\"));",
+									"    ",
+									"    // Verificar si hay más jerarquías por procesar",
+									"    const currentIndex = parseInt(pm.collectionVariables.get(\"current_jerarquia_index\") || 0);",
+									"    const totalJerarquias = 15;",
+									"    ",
+									"    if (currentIndex < totalJerarquias) {",
+									"        console.log(\"⏭️  Continuando con la siguiente jerarquía...\");",
+									"        pm.execution.setNextRequest(pm.info.requestName);",
+									"    } else {",
+									"        console.log(\"🎉 ¡Todas las jerarquías han sido creadas exitosamente!\");",
+									"    }",
+									"} else {",
+									"    console.log(\"❌ Error al crear jerarquía: \" + pm.response.text());",
+									"    console.log(\"Código de error: \" + pm.response.code);",
+									"    pm.execution.setNextRequest(null); // Detener en caso de error",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\n  {\n    \"id_jerarquia\": 5,\n    \"id_rol\": 5,                // \"Lider de clan IA\"\n    \"id_rol_superior\": 2,       // \"Jefe TI\"\n    \"resumen\": \"Lider de clan IA: nivel 3, depende de Jefe TI.\"\n  }\n\n\n/*{\n    \"id_jerarquia\": {{id_jerarquia}},\n    \"id_rol\":{{id_rol}},\n    \"id_rol_superior\":{{id_rol_superior}},\n    \"resumen\":{{resumen}}\n}*/",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/jerarquia-roles/guardarJerarquiaRol"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar - Jerarquia-roles",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id_jerarquia\": 1,\n    \"id_rol\": 4,\n    \"id_rol_superior\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/jerarquia-roles/actualizarJerarquiaRol/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar - jerarquia-roles",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost/api/jerarquia-roles/eliminarJerarquiaRol/5"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Usuarios",
+			"item": [
+				{
+					"name": "Listar Usuarios",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/usuarios"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Usuarios",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id_usuario\": \"USER-001\",\n    \"nombre\": \"Juan\",\n    \"apellido\": \"Pérez\",\n    \"email\": \"juan@empresa.com\",\n    \"password_hash\": \"password123\",\n    \"username\": \"juanperez\",\n    \"id_rol\": 10, \n    \"id_organizacion\": \"1\",\n    \"id_jerarquia\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/usuarios/"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Usuarios",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost/api/usuarios/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Usuarios",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/usuarios/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Usuarios",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/usuarios/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tipos de Productos",
+			"item": [
+				{
+					"name": "Listar Tipos de Productos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tipos-productos"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Tipos de Productos",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// ==========================\r",
+									"// 📌 PRE-REQUEST SCRIPT PARA TIPOS DE PRODUCTO\r",
+									"// ==========================\r",
+									"\r",
+									"// Limpiar variables previas para evitar conflictos\r",
+									"if (pm.environment.get(\"productosData\") && parseInt(pm.environment.get(\"currentProductoIndex\")) >= 10) {\r",
+									"    pm.environment.unset(\"productosData\");\r",
+									"    pm.environment.unset(\"currentProductoIndex\");\r",
+									"    console.log(\"🔄 Reiniciando variables para productos...\");\r",
+									"}\r",
+									"\r",
+									"if (!pm.environment.get(\"productosData\")) {\r",
+									"    // Datos de tipos de producto\r",
+									"    const productosData = [\r",
+									"        {\r",
+									"            \"id_producto\": \"NAV-001\",\r",
+									"            \"id_organizacion\": \"1\", \r",
+									"            \"nombre_producto\": \"Chrome\",\r",
+									"            \"descripcion\": \"Navegador web de Google\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"NAV-002\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"Firefox\", \r",
+									"            \"descripcion\": \"Navegador web de Mozilla\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"OFI-001\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"Microsoft Office\",\r",
+									"            \"descripcion\": \"Suite ofimática de Microsoft\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"OFI-002\",\r",
+									"            \"id_organizacion\": \"1\", \r",
+									"            \"nombre_producto\": \"Google Workspace\",\r",
+									"            \"descripcion\": \"Suite ofimática en la nube de Google\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"DIS-001\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"Photoshop\",\r",
+									"            \"descripcion\": \"Programa de diseño gráfico de Adobe\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"DIS-002\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"GIMP\",\r",
+									"            \"descripcion\": \"Programa de diseño gráfico open source\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"COM-001\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"Slack\",\r",
+									"            \"descripcion\": \"Herramienta de comunicación para equipos\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"COM-002\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"Zoom\",\r",
+									"            \"descripcion\": \"Plataforma de videoconferencias\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"EMP-001\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"SAP\",\r",
+									"            \"descripcion\": \"Software empresarial de gestión\"\r",
+									"        },\r",
+									"        {\r",
+									"            \"id_producto\": \"EMP-002\",\r",
+									"            \"id_organizacion\": \"1\",\r",
+									"            \"nombre_producto\": \"Salesforce\",\r",
+									"            \"descripcion\": \"Plataforma de CRM en la nube\"\r",
+									"        }\r",
+									"    ];\r",
+									"\r",
+									"    pm.environment.set(\"productosData\", JSON.stringify(productosData));\r",
+									"    pm.environment.set(\"currentProductoIndex\", 0);\r",
+									"    console.log(\"⚙️ Inicializado con \" + productosData.length + \" tipos de producto\");\r",
+									"}\r",
+									"\r",
+									"// Configurar request actual\r",
+									"const productos = JSON.parse(pm.environment.get(\"productosData\"));\r",
+									"const currentIndex = parseInt(pm.environment.get(\"currentProductoIndex\"));\r",
+									"const currentProducto = productos[currentIndex];\r",
+									"\r",
+									"console.log(`📤 Enviando producto ${currentIndex + 1}/10: ${currentProducto.nombre_producto}`);\r",
+									"\r",
+									"// Setear variables para el body\r",
+									"pm.environment.set(\"Var_id_producto\", currentProducto.id_producto);\r",
+									"pm.environment.set(\"Var_id_organizacion\", currentProducto.id_organizacion);\r",
+									"pm.environment.set(\"Var_nombre_producto\", currentProducto.nombre_producto);\r",
+									"pm.environment.set(\"Var_descripcion\", currentProducto.descripcion);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// ==========================\r",
+									"// 📌 TESTS SCRIPT PARA TIPOS DE PRODUCTO\r",
+									"// ==========================\r",
+									"\r",
+									"try {\r",
+									"    const productos = JSON.parse(pm.environment.get(\"productosData\"));\r",
+									"    let currentIndex = parseInt(pm.environment.get(\"currentProductoIndex\"));\r",
+									"    const currentProducto = productos[currentIndex];\r",
+									"    \r",
+									"    console.log(`✅ Procesado: ${currentProducto.nombre_producto} | Status: ${pm.response.code}`);\r",
+									"\r",
+									"    // Verificar si es el último producto\r",
+									"    if (currentIndex === productos.length - 1) {\r",
+									"        console.log(\"🏁 Todos los tipos de producto procesados correctamente\");\r",
+									"        pm.environment.unset(\"currentProductoIndex\");\r",
+									"        pm.environment.unset(\"productosData\");\r",
+									"        pm.execution.setNextRequest(null);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    // Avanzar al siguiente producto\r",
+									"    currentIndex++;\r",
+									"    pm.environment.set(\"currentProductoIndex\", currentIndex);\r",
+									"\r",
+									"    // Configurar próximo request\r",
+									"    const nextProducto = productos[currentIndex];\r",
+									"    console.log(`⏭ Próximo producto: ${nextProducto.nombre_producto}`);\r",
+									"    \r",
+									"    // Setear variables para el próximo request\r",
+									"    pm.environment.set(\"Var_id_producto\", nextProducto.id_producto);\r",
+									"    pm.environment.set(\"Var_id_organizacion\", nextProducto.id_organizacion);\r",
+									"    pm.environment.set(\"Var_nombre_producto\", nextProducto.nombre_producto);\r",
+									"    pm.environment.set(\"Var_descripcion\", nextProducto.descripcion);\r",
+									"    \r",
+									"    // Continuar con el siguiente request\r",
+									"    pm.execution.setNextRequest(pm.info.requestName);\r",
+									"\r",
+									"} catch (error) {\r",
+									"    console.error(\"⚠️ Error:\", error);\r",
+									"    pm.execution.setNextRequest(pm.info.requestName);  \r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id_producto\": \"{{Var_id_producto}}\",\n    \"id_organizacion\": \"{{Var_id_organizacion}}\",\n    \"nombre_producto\": \"{{Var_nombre_producto}}\",\n    \"descripcion\": \"{{Var_descripcion}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost/api/tipo-productos"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Tipos de Productos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tipos-productos/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Tipos de Productos",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/tipos-productos/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Tipos de Productos",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tipos-productos/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tickets",
+			"item": [
+				{
+					"name": "Listar Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tickets"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Tickets",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/tickets"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tickets/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Tickets",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/tickets/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Tickets",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tickets/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Logs de Tickets",
+			"item": [
+				{
+					"name": "Listar Logs de Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tickets-logs"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Logs de Tickets",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/tickets-logs"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Logs de Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tickets-logs/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Logs de Tickets",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_organizacion\": 1,\n  \"id_rol\": 1,\n  \"id_usuario\": \"usr001\",\n  \"nombre\": \"John\",\n  \"apellido\": \"Doe\",\n  \"proyecto\": \"Proyecto TFM\",\n  \"id_empleado\": \"EMP001\",\n  \"correo\": \"john@example.com\",\n  \"contrase\\u00f1a\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/tickets-logs/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Logs de Tickets",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": "http://localhost:8000/api/tickets-logs/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "http://localhost/api/debug",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/debug"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "current_index",
+			"value": ""
+		},
+		{
+			"key": "id_jerarquia",
+			"value": ""
+		},
+		{
+			"key": "id_rol",
+			"value": ""
+		},
+		{
+			"key": "id_rol_superior",
+			"value": ""
+		},
+		{
+			"key": "resumen",
+			"value": ""
+		},
+		{
+			"key": "current_jerarquia_index",
+			"value": ""
+		}
+	]
+}

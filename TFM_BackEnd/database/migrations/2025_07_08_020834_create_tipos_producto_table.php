@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('tipo_productos', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('id_producto', 50)->unique();
-            $table->string('id_organizacion', 50);
+            $table->string('id_organizacion', 50)->unique();
             $table->string('nombre_producto', 100);
             $table->text('descripcion')->nullable();
             $table->foreign('id_organizacion')

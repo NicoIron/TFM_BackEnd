@@ -12,17 +12,16 @@ class TiposProductos extends Model
     /**
      * La tabla asociada al modelo.
      */
-    protected $table = 'tipos_producto';
+    protected $table = 'tipo_productos';
 
     /**
      * Atributos que se pueden asignar masivamente.
      */
     protected $fillable = [
+        'id_producto',
         'id_organizacion',
-        'nombre',
-        'descripcion',
-        'id_padre',
-        'eliminado',
+        'nombre_producto',
+        'descripcion'
     ];
 
     /**
@@ -33,21 +32,7 @@ class TiposProductos extends Model
         return $this->belongsTo(Organizacion::class, 'id_organizacion');
     }
 
-    /**
-     * Relación recursiva: Tipo de producto padre.
-     */
-    public function padre()
-    {
-        return $this->belongsTo(TiposProductos::class, 'id_padre');
-    }
 
-    /**
-     * Relación recursiva: Subtipos de producto.
-     */
-    public function hijos()
-    {
-        return $this->hasMany(TiposProductos::class, 'id_padre');
-    }
 
     /**
      * Relación uno a muchos: Este tipo tiene muchos tickets.

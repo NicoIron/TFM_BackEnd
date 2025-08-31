@@ -61,7 +61,7 @@ Route::prefix('jerarquia-roles')->group(function () {
 });
 
 // TIPOS DE PRODUCTOS
-Route::prefix('tipos-productos')->group(function () {
+Route::prefix('tipo-productos')->group(function () {
     Route::get('/', [TiposProductosController::class, 'listar']);
     Route::post('/', [TiposProductosController::class, 'guardar']);
     Route::get('/{id}', [TiposProductosController::class, 'ver']);

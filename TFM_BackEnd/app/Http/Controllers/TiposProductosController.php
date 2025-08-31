@@ -22,10 +22,10 @@ class TiposProductosController extends Controller
         $response = new ResultResponse();
 
         $validated = $request->validate([
-            'id_organizacion' => 'required|integer',
-            'nombre' => 'required|string',
+            'id_producto' => 'required|string|max:50',
+            'id_organizacion' => 'required|string',
+            'nombre_producto' => 'required|string',
             'descripcion' => 'nullable|string',
-            'id_padre' => 'nullable|integer|exists:tipos_producto,id',
         ]);
 
         $tipo = TiposProductos::create($validated);
