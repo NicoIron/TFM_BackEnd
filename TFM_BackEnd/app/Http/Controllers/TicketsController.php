@@ -6,11 +6,17 @@ use App\Models\Tickets;
 use Illuminate\Http\Request;
 use App\Utils\ResultResponse;
 use Illuminate\Support\Facades\Validator;
-use App\Models\TicketsLogs;
 use Illuminate\Support\Facades\Log;
 
 class TicketsController extends Controller
 {
+    protected $ticketsLogsController;
+
+    public function __construct(TicketsLogsController $ticketsLogsController)
+    {
+        $this->ticketsLogsController = $ticketsLogsController;
+    }
+
     public function listar()
     {
         $response = new ResultResponse();
@@ -28,91 +34,66 @@ class TicketsController extends Controller
         return response()->json($response, $response->getStatusCode());
     }
 
-public function guardar(Request $request)
-{
-    $response = new ResultResponse();
+    public function guardar(Request $request)
+    {
+        $response = new ResultResponse();
 
-    $validator = Validator::make($request->all(), [
-        'id_ticket'        => 'required|unique:tickets,id_ticket',
-        'id_organizacion'  => 'required|exists:organizacion,id_organizacion',
-        'id_usuario'       => 'required|exists:usuarios,id_usuario',
-        'id_tipo_producto' => 'required|exists:tipo_productos,id_producto',
-        'monto'            => 'nullable|numeric|min:0',
-        'proyecto'         => 'nullable|string',
-        'descr_compra'     => 'nullable|string',
-        //  Removemos 'estado_ticket' y 'fecha_cierre' de la validación
-    ]);
-
-    if ($validator->fails()) {
-        $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-        $response->setMessage('Error en la validación.');
-        $response->setData($validator->errors());
-        return response()->json($response, $response->getStatusCode());
-    }
-
-    try {
-        // Forzar valores por defecto
-        $ticketData = $request->only([
-            'id_ticket',
-            'id_organizacion',
-            'id_usuario',
-            'id_tipo_producto',
-            'monto',
-            'proyecto',
-            'descr_compra',
+        $validator = Validator::make($request->all(), [
+            'id_ticket'        => 'required|unique:tickets,id_ticket',
+            'id_organizacion'  => 'required|exists:organizacion,id_organizacion',
+            'id_usuario'       => 'required|exists:usuarios,id_usuario',
+            'id_tipo_producto' => 'required|exists:tipo_productos,id_producto',
+            'monto'            => 'nullable|numeric|min:0',
+            'proyecto'         => 'nullable|string',
+            'descr_compra'     => 'nullable|string',
         ]);
 
-        // Establecer estado como "pendiente" y fecha_cierre como null
-        $ticketData['estado_ticket'] = 'pendiente';
-        $ticketData['fecha_cierre'] = null;
+        if ($validator->fails()) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Error en la validación.');
+            $response->setData($validator->errors());
+            return response()->json($response, $response->getStatusCode());
+        }
 
-        $ticket = Tickets::create($ticketData);
+        try {
+            $ticketData = $request->only([
+                'id_ticket',
+                'id_organizacion',
+                'id_usuario',
+                'id_tipo_producto',
+                'monto',
+                'proyecto',
+                'descr_compra',
+            ]);
 
-        // REGISTRAR EN LOGS - Crear entrada en tickets_logs
-        $this->registrarLogTicket(
-            $ticket->id_ticket,
-            $request->id_usuario,
-            null, // estado_anterior (no existe para creación)
-            'pendiente', // estado_nuevo
-            'creacion' // acción
-        );
+            $ticketData['estado_ticket'] = 'pendiente';
+            $ticketData['fecha_cierre'] = null;
 
-        $response->setData($ticket);
-        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-        $response->setMessage('Ticket creado correctamente con estado pendiente');
-        return response()->json($response, 201);
+            $ticket = Tickets::create($ticketData);
 
-    } catch (\Exception $e) {
-        $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
-        $response->setMessage('Error al crear el ticket: ' . $e->getMessage());
-        return response()->json($response, $response->getStatusCode());
+            // Registrar log llamando a  TicketsLogsController
+            $logRequest = new Request([
+                'id_ticket_log' => 'LOG-' . uniqid(),
+                'id_ticket' => $ticket->id_ticket,
+                'id_usuario' => $request->id_usuario,
+                'estado_anterior' => null,
+                'estado_nuevo' => 'pendiente',
+                'fecha_cambio' => now()
+            ]);
+
+            $this->ticketsLogsController->guardar($logRequest);
+
+            $response->setData($ticket);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Ticket creado correctamente');
+            return response()->json($response, 201);
+
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al crear el ticket: ' . $e->getMessage());
+            return response()->json($response, $response->getStatusCode());
+        }
     }
-}
-
-/**
- * Método para registrar logs de tickets
- */
-private function registrarLogTicket($idTicket, $idUsuario, $estadoAnterior, $estadoNuevo)
-{
-    try {
-        // Generar ID único para el log
-        $idTicketLog = 'LOG-' . uniqid();
-        TicketsLogs::create([
-            'id_ticket_log' => $idTicketLog,
-            'id_ticket' => $idTicket,
-            'id_usuario' => $idUsuario,
-            'estado_anterior' => $estadoAnterior,
-            'estado_nuevo' => $estadoNuevo,
-            'fecha_cambio' => now()
-        ]);
-
-        Log::info("Log registrado para ticket: $idTicket, estado: $estadoAnterior -> $estadoNuevo");
-
-    } catch (\Exception $e) {
-        Log::error('Error al registrar log de ticket: ' . $e->getMessage()); //  Corregido
-        Log::error('Detalles del error: ' . $e->getTraceAsString()); //  Corregido
-    }
-}
 
     public function ver($id)
     {
@@ -127,9 +108,22 @@ private function registrarLogTicket($idTicket, $idUsuario, $estadoAnterior, $est
                 return response()->json($response, $response->getStatusCode());
             }
 
+            // Registrar log usando TicketsLogsController
+            $logRequest = new Request([
+                'id_ticket_log' => 'LOG-' . uniqid(),
+                'id_ticket' => $ticket->id_ticket,
+                'id_usuario' => 'sistema',
+                'estado_anterior' => 'consultado',
+                'estado_nuevo' => 'consultado',
+                'fecha_cambio' => now()
+            ]);
+
+            $this->ticketsLogsController->guardar($logRequest);
+
             $response->setData($ticket);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-            $response->setMessage('Ticket obtenido correctamente');
+            $response->setMessage('Ticket encontrado');
+
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener el ticket: ' . $e->getMessage());
@@ -143,15 +137,13 @@ private function registrarLogTicket($idTicket, $idUsuario, $estadoAnterior, $est
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_ticket'        => "required|unique:tickets,id_ticket,$id",
-            'id_organizacion'  => 'required|exists:organizacion,id_organizacion',
-            'id_usuario'       => 'required|exists:usuarios,id_usuario',
-            'id_tipo_producto' => 'required|exists:tipo_productos,id_producto',
-            'monto'            => 'nullable|numeric|min:0',
-            'proyecto'         => 'nullable|string',
-            'descr_compra'     => 'nullable|string',
-            'estado_ticket'    => 'required|string|max:50',
-            'fecha_cierre'     => 'nullable|date',
+            'id_ticket'        => "sometimes|unique:tickets,id_ticket,$id",
+            'id_organizacion'  => 'sometimes|exists:organizacion,id_organizacion',
+            'id_usuario'       => 'sometimes|exists:usuarios,id_usuario',
+            'id_tipo_producto' => 'sometimes|exists:tipo_productos,id_producto',
+            'monto'            => 'sometimes|numeric|min:0',
+            'proyecto'         => 'sometimes|string',
+            'descr_compra'     => 'sometimes|string',
         ]);
 
         if ($validator->fails()) {
@@ -170,21 +162,88 @@ private function registrarLogTicket($idTicket, $idUsuario, $estadoAnterior, $est
                 return response()->json($response, $response->getStatusCode());
             }
 
-            $ticket->update($request->only([
-                'id_ticket',
-                'id_organizacion',
-                'id_usuario',
-                'id_tipo_producto',
-                'monto',
-                'proyecto',
-                'descr_compra',
-                'estado_ticket',
-                'fecha_cierre',
-            ]));
+            $estadoAnterior = $ticket->estado_ticket;
+
+            $ticket->update($request->all());
+
+            // Registrar log usando TicketsLogsController
+            $logRequest = new Request([
+                'id_ticket_log' => 'LOG-' . uniqid(),
+                'id_ticket' => $ticket->id_ticket,
+                'id_usuario' => 'sistema',
+                'estado_anterior' => $estadoAnterior,
+                'estado_nuevo' => $ticket->estado_ticket,
+                'fecha_cambio' => now()
+            ]);
+
+            $this->ticketsLogsController->guardar($logRequest);
 
             $response->setData($ticket);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket actualizado correctamente');
+
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al actualizar el ticket: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
+    }
+
+    public function actualizarEstado(Request $request, $id)
+    {
+        $response = new ResultResponse();
+
+        $validator = Validator::make($request->all(), [
+            'estado_ticket' => 'required|in:pendiente,en_revision,aprobado,rechazado,completado',
+            'fecha_cierre' => 'nullable|date|required_if:estado_ticket,completado,rechazado',
+            'id_usuario_accion' => 'required|exists:usuarios,id_usuario'
+        ]);
+
+        if ($validator->fails()) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Error en la validación.');
+            $response->setData($validator->errors());
+            return response()->json($response, $response->getStatusCode());
+        }
+
+        try {
+            $ticket = Tickets::find($id);
+
+            if (!$ticket) {
+                $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                $response->setMessage('Ticket no encontrado');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            $estadoAnterior = $ticket->estado_ticket;
+
+            $ticket->estado_ticket = $request->estado_ticket;
+
+            if (in_array($request->estado_ticket, ['completado', 'rechazado'])) {
+                $ticket->fecha_cierre = $request->fecha_cierre ?? now();
+            } else {
+                $ticket->fecha_cierre = null;
+            }
+
+            $ticket->save();
+
+            // Registrar log usando TicketsLogsController
+            $logRequest = new Request([
+                'id_ticket_log' => 'LOG-' . uniqid(),
+                'id_ticket' => $ticket->id_ticket,
+                'id_usuario' => $request->id_usuario_accion,
+                'estado_anterior' => $estadoAnterior,
+                'estado_nuevo' => $request->estado_ticket,
+                'fecha_cambio' => now()
+            ]);
+
+            $this->ticketsLogsController->guardar($logRequest);
+
+            $response->setData($ticket);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Estado del ticket actualizado correctamente');
+
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al actualizar el ticket: ' . $e->getMessage());
@@ -206,9 +265,26 @@ private function registrarLogTicket($idTicket, $idUsuario, $estadoAnterior, $est
                 return response()->json($response, $response->getStatusCode());
             }
 
+            $idTicket = $ticket->id_ticket;
+            $estadoAnterior = $ticket->estado_ticket;
+
             $ticket->delete();
+
+            // Registrar log usando TicketsLogsController
+            $logRequest = new Request([
+                'id_ticket_log' => 'LOG-' . uniqid(),
+                'id_ticket' => $idTicket,
+                'id_usuario' => 'sistema',
+                'estado_anterior' => $estadoAnterior,
+                'estado_nuevo' => 'eliminado',
+                'fecha_cambio' => now()
+            ]);
+
+            $this->ticketsLogsController->guardar($logRequest);
+
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket eliminado correctamente');
+
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al eliminar el ticket: ' . $e->getMessage());

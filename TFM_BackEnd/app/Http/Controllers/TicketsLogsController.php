@@ -29,7 +29,7 @@ class TicketsLogsController extends Controller
             'id_usuario' => 'required|exists:usuarios,id_usuario',
             'estado_anterior' => 'nullable|string|max:50',
             'estado_nuevo' => 'required|string|max:50',
-            'fecha_cambio' => 'nullable|date'
+            'fecha_cambio' => 'nullable|date',
         ]);
 
         try {
