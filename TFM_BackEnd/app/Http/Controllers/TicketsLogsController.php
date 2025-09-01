@@ -24,8 +24,12 @@ class TicketsLogsController extends Controller
         $response = new ResultResponse();
 
         $validated = $request->validate([
-            'id_ticket' => 'required|exists:tickets,id',
-            'action' => 'required|string|max:255',
+            'id_ticket_log' => 'required|string|max:50|unique:tickets_logs,id_ticket_log',
+            'id_ticket' => 'required|exists:tickets,id_ticket',
+            'id_usuario' => 'required|exists:usuarios,id_usuario',
+            'estado_anterior' => 'nullable|string|max:50',
+            'estado_nuevo' => 'required|string|max:50',
+            'fecha_cambio' => 'nullable|date'
         ]);
 
         try {
@@ -71,8 +75,11 @@ class TicketsLogsController extends Controller
         }
 
         $validated = $request->validate([
-            'id_ticket' => 'sometimes|exists:tickets,id',
-            'action' => 'sometimes|string|max:255',
+            'id_ticket' => 'sometimes|exists:tickets,id_ticket',
+            'id_usuario' => 'sometimes|exists:usuarios,id_usuario',
+            'estado_anterior' => 'nullable|string|max:50',
+            'estado_nuevo' => 'sometimes|string|max:50',
+            'fecha_cambio' => 'nullable|date',
         ]);
 
         try {

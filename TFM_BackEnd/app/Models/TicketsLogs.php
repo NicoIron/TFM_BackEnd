@@ -4,30 +4,41 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TicketsLogs extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * La tabla asociada al modelo.
-     */
     protected $table = 'tickets_logs';
 
-    /**
-     * Atributos que se pueden asignar masivamente.
-     */
     protected $fillable = [
+        'id_ticket_log',
         'id_ticket',
-        'action',
-        'eliminado',
+        'id_usuario',
+        'estado_anterior',
+        'estado_nuevo',
+        'fecha_cambio'
+    ];
+
+    protected $casts = [
+        'fecha_cambio' => 'datetime',
+        'eliminado' => 'boolean'
     ];
 
     /**
-     * Relación inversa: Este log pertenece a un ticket.
+     * Relación: Este log pertenece a un ticket.
      */
     public function ticket()
     {
-        return $this->belongsTo(Tickets::class, 'id_ticket');
+        return $this->belongsTo(Tickets::class, 'id_ticket', 'id_ticket');
+    }
+
+    /**
+     * Relación: Este log pertenece a un usuario.
+     */
+    public function usuario()
+    {
+        return $this->belongsTo(Usuario::class, 'id_usuario', 'id_usuario');
     }
 }
