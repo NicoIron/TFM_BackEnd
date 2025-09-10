@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Fruitcake\Cors\HandleCors;
 
 class Kernel extends HttpKernel
 {
@@ -22,6 +23,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+           // \Fruitcake\Cors\HandleCors::class,
             \App\Http\Middleware\ForceJsonResponse::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,

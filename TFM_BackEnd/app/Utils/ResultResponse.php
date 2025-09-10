@@ -10,6 +10,7 @@ class ResultResponse
     const ERROR_ELEMENT_NOT_FOUND_CODE = 404;
     const ERROR_INTERNAL_SERVER = 500;
     const ERROR_VALIDATION_CODE = 422;
+    const ERROR_UNAUTHORIZED_CODE = 401;
 
 
     const TXT_SUCCESS_CODE = 'Success';

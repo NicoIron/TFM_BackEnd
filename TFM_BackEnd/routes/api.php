@@ -9,6 +9,7 @@ use App\Http\Controllers\TiposProductosController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\TicketsLogsController;
 use App\Http\Controllers\JerarquiaRolController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/debug', fn() => response()->json(['ok' => true]));
 
@@ -86,3 +87,19 @@ Route::prefix('tickets-logs')->group(function () {
     Route::put('/{id}', [TicketsLogsController::class, 'actualizar']);
     Route::delete('/{id}', [TicketsLogsController::class, 'eliminar']);
 });
+
+
+// Login y Logout
+
+
+Route::prefix('login')->group(function () {
+    Route::post('/', [AuthController::class, 'login']);
+
+});
+
+Route::prefix('logout')->group(function () {
+    Route::post('/', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+});
+
+
