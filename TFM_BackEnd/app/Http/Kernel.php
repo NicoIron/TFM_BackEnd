@@ -4,7 +4,7 @@ namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Fruitcake\Cors\HandleCors;
-
+dd('El kernel fue cargado correctamente');
 class Kernel extends HttpKernel
 {
     protected $middleware = [
@@ -34,5 +34,8 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        'Nocache' => \App\Http\Middleware\NoCacheMiddleware::class,
     ];
+
+
 }

@@ -139,7 +139,7 @@ class TicketsController extends Controller
                 'id_usuario' => 'sistema', // Usuario sistema (consulta automática)
                 'estado_anterior' => 'consultado', // Estado para registro de consulta
                 'estado_nuevo' => 'consultado', // Mismo estado para consulta
-                'fecha_cambio' => now() // Fecha y hora actual
+                'fecha_cambio' => now()
             ]);
 
             // LLAMAR AL CONTROLADOR DE LOGS: Registrar el log de consulta
