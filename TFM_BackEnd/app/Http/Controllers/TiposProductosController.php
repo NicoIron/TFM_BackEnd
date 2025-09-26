@@ -11,10 +11,17 @@ class TiposProductosController extends Controller
     public function listar()
     {
         $response = new ResultResponse();
-        $response->setData(TiposProductos::all());
-        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-        $response->setMessage('Listado de tipos de producto');
+        try {
+            $tipos = TiposProductos::whereNull('deleted_at')->get();
+            $response->setData($tipos);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Listado de tipos de producto');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al listar los tipos de producto: ' . $e->getMessage());
+        }
         return response()->json($response);
+
     }
 
     public function guardar(Request $request)

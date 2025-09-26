@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Utils\ResultResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use App\Models\Usuario;
+use App\Http\Controllers\TicketsLogsController;
+use PHPUnit\Framework\Attributes\Ticket;
 
 class TicketsController extends Controller
 {
@@ -61,7 +64,7 @@ class TicketsController extends Controller
             'descr_compra'     => 'nullable|string',
         ]);
 
-        // Si la validación falla, retornar errores
+
         if ($validator->fails()) {
             $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
             $response->setMessage('Error en la validación.');
@@ -70,7 +73,7 @@ class TicketsController extends Controller
         }
 
         try {
-            // Extraer solo los campos necesarios del request
+
             $ticketData = $request->only([
                 'id_ticket',
                 'id_organizacion',
@@ -143,15 +146,14 @@ class TicketsController extends Controller
             ]);
 
             // LLAMAR AL CONTROLADOR DE LOGS: Registrar el log de consulta
-            $this->ticketsLogsController->guardar($logRequest);
+          //  $this->ticketsLogsController->guardar($logRequest);
 
-            // Configurar respuesta exitosa
+
             $response->setData($ticket);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket encontrado');
 
         } catch (\Exception $e) {
-            // Configurar respuesta de error
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener el ticket: ' . $e->getMessage());
         }
@@ -351,6 +353,33 @@ class TicketsController extends Controller
             // Configurar respuesta de error
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al eliminar el ticket: ' . $e->getMessage());
+        }
+
+        // Devolver respuesta en formato JSON
+        return response()->json($response, $response->getStatusCode());
+    }
+
+    public function obtenerTicketsPorUsuario($id_usuario)
+    {
+        // Crear nueva instancia de respuesta
+        $response = new ResultResponse();
+
+        try{
+            $tickets = Tickets::with(['organizacion', 'tipoProducto'])
+                ->where('id_usuario', $id_usuario)
+                ->get();
+
+                if($tickets->isEmpty()) {
+                    $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
+                    $response->setMessage('No se encontraron tickets para el usuario especificado');
+                    return response()->json($response, $response->getStatusCode());
+                }
+                $response->setData($tickets);
+                $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+                $response->setMessage('Tickets del usuario obtenidos correctamente');
+        }catch(\Exception $e){
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al obtener los tickets del usuario: ' . $e->getMessage());
         }
 
         // Devolver respuesta en formato JSON
