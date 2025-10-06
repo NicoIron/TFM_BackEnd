@@ -77,10 +77,18 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
     Route::prefix('tickets')->group(function () {
         Route::get('/', [TicketsController::class, 'listar']);
         Route::post('/', [TicketsController::class, 'guardar']);
+
+        // Rutas específicas ANTES de las genéricas con parámetros
+        Route::get('/usuario/{id_usuario}', [TicketsController::class, 'obtenerTicketsPorUsuario']);
+        Route::get('/aprobador/{id_aprobador}', [TicketsController::class, 'obtenerTicketsPorAprobador']);
+        Route::put('/{id}/estado', [TicketsController::class, 'actualizarEstado']);
+        Route::put('/{id}/escalar', [TicketsController::class, 'escalar']);
+        Route::get('/estadisticas/{id_usuario}', [TicketsController::class, 'obtenerEstadisticas']);
+
+        // Rutas genéricas al final
         Route::get('/{id}', [TicketsController::class, 'ver']);
         Route::put('/{id}', [TicketsController::class, 'actualizar']);
         Route::delete('/{id}', [TicketsController::class, 'eliminar']);
-        Route::get('/usuario/{id_usuario}', [TicketsController::class, 'obtenerTicketsPorUsuario']);
     });
 
     // LOGS DE TICKETS
