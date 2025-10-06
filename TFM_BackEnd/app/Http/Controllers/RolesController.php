@@ -17,7 +17,6 @@ class RolesController extends Controller
         $response = new ResultResponse();
 
         try {
-            // Obtiene todos los roles con las relaciones definidas en el modelo
             $roles = Roles::with(['organizacion', 'jerarquia'])->get();
 
             $response->setData($roles);

@@ -125,6 +125,41 @@ class UsuarioController extends Controller
         return response()->json($response, $response->getStatusCode());
     }
 
+public function obtenerSiguienteId()
+{
+    $response = new ResultResponse();
+
+    try {
+        // Obtener el último usuario ordenado por id_usuario descendente
+        $ultimoUsuario = Usuario::orderBy('id_usuario', 'desc')->first();
+
+        if (!$ultimoUsuario) {
+            $siguienteId = 'USER-001';
+        } else {
+            // Extraer el número del último ID (formato USER-XXX)
+            preg_match('/USER-(\d+)/', $ultimoUsuario->id_usuario, $matches);
+
+            if (isset($matches[1])) {
+                $ultimoNumero = (int)$matches[1];
+                $siguienteNumero = $ultimoNumero + 1;
+                $siguienteId = 'USER-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT);
+            } else {
+                $siguienteId = 'USER-001';
+            }
+        }
+
+        $response->setData(['nextId' => $siguienteId]);
+        $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+        $response->setMessage('Siguiente ID obtenido correctamente');
+
+    } catch (\Exception $e) {
+        $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+        $response->setMessage('Error al obtener siguiente ID: ' . $e->getMessage());
+    }
+
+    return response()->json($response, $response->getStatusCode());
+}
+
     /**
      *  Ver un usuario por su ID
      */

@@ -20,7 +20,7 @@ class Organizacion extends Model
     /* Relación uno a muchos: Una organización tiene muchas jerarquías */
     public function jerarquias()
     {
-        return $this->hasMany(Jerarquia::class, 'id_organizacion');
+        return $this->hasMany(JerarquiaInicial::class, 'id_organizacion');
     }
 
     /* Relación uno a muchos: Una organización tiene muchos roles */

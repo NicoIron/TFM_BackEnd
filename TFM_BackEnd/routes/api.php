@@ -30,9 +30,11 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
     Route::prefix('usuarios')->group(function () {
         Route::get('/', [UsuarioController::class, 'listar']);
         Route::post('/', [UsuarioController::class, 'guardar']);
+        Route::get('/nextId', [UsuarioController::class, 'obtenerSiguienteId']);
         Route::get('/{id}', [UsuarioController::class, 'ver']);
         Route::put('/{id}', [UsuarioController::class, 'actualizar']);
         Route::delete('/{id}', [UsuarioController::class, 'eliminar']);
+
     });
 
     // JERARQUÍAS INICIALES

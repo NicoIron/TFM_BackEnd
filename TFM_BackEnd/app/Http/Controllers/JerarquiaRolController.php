@@ -31,7 +31,6 @@ class JerarquiaRolController extends Controller
     }
 
     // Método para guardar una nueva relación de jerarquía y rol
-    // Método para guardar una nueva relación de jerarquía y rol
     public function guardar(Request $request)
     {
         $response = new ResultResponse();
@@ -96,7 +95,6 @@ class JerarquiaRolController extends Controller
                 return response()->json($response, $response->getStatusCode());
             }
         }
-        // --- Fin validación niveles ---
 
         try {
             // Para Comité Operativo, forzar id_rol_superior a null

@@ -20,3 +20,4 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+TFM_BackEnd/app/Utils/*.postman_collection.json
