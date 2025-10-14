@@ -40,7 +40,7 @@ class OrganizacionController extends Controller
 
         if ($validator->fails()) {
             $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-            $response->setMessage('Error en la validación.');
+            $response->setMessage('Error en la validación o datos repetidos.');
             $response->setData($validator->errors());
             return response()->json($response, $response->getStatusCode());
         }
