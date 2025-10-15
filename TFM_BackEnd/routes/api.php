@@ -10,7 +10,8 @@ use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\TicketsLogsController;
 use App\Http\Controllers\JerarquiaRolController;
 use App\Http\Controllers\AuthController;
-use App\Http\Middleware\NoCacheMiddleware; // ✅ Importar la clase directamente
+use App\Http\Middleware\NoCacheMiddleware;
+use App\Http\Controllers\NotificacionesController;
 
 Route::get('/debug', fn() => response()->json(['ok' => true]));
 
@@ -100,6 +101,14 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::delete('/{id}', [TicketsLogsController::class, 'eliminar']);
 
     });
+
+    // NOTIFICACIONES
+Route::prefix('notificaciones')->group(function () {
+    Route::get('/{id_usuario}', [NotificacionesController::class, 'obtenerNotificaciones']);
+    Route::get('/{id_usuario}/count', [NotificacionesController::class, 'contarNoLeidas']);
+    Route::put('/{id}/leida', [NotificacionesController::class, 'marcarComoLeida']);
+    Route::put('/{id_usuario}/leer-todas', [NotificacionesController::class, 'marcarTodasComoLeidas']);
+});
 
     // LOGOUT
     Route::prefix('logout')->group(function () {
