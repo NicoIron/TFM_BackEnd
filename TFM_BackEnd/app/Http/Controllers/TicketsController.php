@@ -86,6 +86,9 @@ class TicketsController extends Controller
                 $aprobadorAsignado = false;
                 $nivelUsuario = $usuario->rol->nivel;
 
+                // CONVERTIR id_organizacion A STRING PARA POSTGRESQL
+                $idOrganizacion = (string)$request->id_organizacion;
+
                 // PASO 1: Intentar asignar según jerarquía específica (id_rol_superior)
                 $relacionJerarquica = JerarquiaRol::where('id_rol', $usuario->rol->id)->first();
 
@@ -93,7 +96,7 @@ class TicketsController extends Controller
                     Log::info("Buscando usuario con rol superior específico ID: {$relacionJerarquica->id_rol_superior}");
 
                     $aprobador = Usuario::where('id_rol', $relacionJerarquica->id_rol_superior)
-                        ->where('id_organizacion', $request->id_organizacion)
+                        ->where('id_organizacion', $idOrganizacion) // FIX: Casting a string
                         ->whereNull('deleted_at')
                         ->first();
 
@@ -114,7 +117,7 @@ class TicketsController extends Controller
                         $aprobador = Usuario::whereHas('rol', function($query) use ($nivelBuscado) {
                             $query->where('nivel', $nivelBuscado);
                         })
-                        ->where('id_organizacion', $request->id_organizacion)
+                        ->where('id_organizacion', $idOrganizacion) // FIX: Casting a string
                         ->whereNull('deleted_at')
                         ->first();
 
@@ -135,7 +138,7 @@ class TicketsController extends Controller
                     $comiteOperativo = Usuario::whereHas('rol', function($query) {
                         $query->where('nombre_rol', 'Comite Operativo');
                     })
-                    ->where('id_organizacion', $request->id_organizacion)
+                    ->where('id_organizacion', $idOrganizacion) // FIX: Casting a string
                     ->whereNull('deleted_at')
                     ->first();
 
@@ -408,24 +411,24 @@ class TicketsController extends Controller
         return response()->json($response, $response->getStatusCode());
     }
 
-    public function escalar(Request $request, $id)
+    public function escalar(Request $request)
     {
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_usuario_actual' => 'required|exists:usuarios,id_usuario',
-            'motivo' => 'nullable|string'
+            'id_ticket' => 'required|exists:tickets,id_ticket',
+            'id_usuario_actual' => 'required|exists:usuarios,id_usuario'
         ]);
 
         if ($validator->fails()) {
             $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
-            $response->setMessage('Error en la validación.');
+            $response->setMessage('Error en la validación');
             $response->setData($validator->errors());
             return response()->json($response, $response->getStatusCode());
         }
 
         try {
-            $ticket = Tickets::find($id);
+            $ticket = Tickets::where('id_ticket', $request->id_ticket)->first();
 
             if (!$ticket) {
                 $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
@@ -449,18 +452,20 @@ class TicketsController extends Controller
 
             $nivelActual = $usuarioActual->rol->nivel;
 
-            $nuevoAprobador = Usuario::whereHas('rol', function($query) use ($nivelActual) {
-                $query->where('nivel', '<', $nivelActual);
+            // CONVERTIR id_organizacion A STRING PARA POSTGRESQL
+            $idOrganizacion = (string)$ticket->id_organizacion;
+
+            // BUSCAR EL SIGUIENTE NIVEL SUPERIOR (nivel más bajo, más cercano al nivel 1)
+            // FIX: Usar join explícito para evitar problemas de casting
+            $nuevoAprobador = Usuario::join('roles', function($join) {
+                $join->on(DB::raw('CAST(usuarios.id_rol AS VARCHAR)'), '=', DB::raw('CAST(roles.id_rol AS VARCHAR)'));
             })
-            ->where('id_organizacion', $ticket->id_organizacion)
-            ->whereNull('deleted_at')
-            ->orderBy(function($query) {
-                $query->select('nivel')
-                    ->from('roles')
-                    ->whereColumn('roles.id', 'usuarios.id_rol')
-                    ->orderBy('nivel', 'desc')
-                    ->limit(1);
-            })
+            ->where('roles.nivel', '<', $nivelActual)
+            ->where('usuarios.id_organizacion', $idOrganizacion)
+            ->whereNull('usuarios.deleted_at')
+            ->whereNull('roles.deleted_at')
+            ->orderBy('roles.nivel', 'DESC')
+            ->select('usuarios.*')
             ->first();
 
             if (!$nuevoAprobador) {
@@ -526,6 +531,7 @@ class TicketsController extends Controller
 
         return response()->json($response, $response->getStatusCode());
     }
+
 
     public function obtenerTicketsPorAprobador($id_aprobador)
     {

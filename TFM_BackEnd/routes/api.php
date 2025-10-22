@@ -35,6 +35,9 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::get('/{id}', [UsuarioController::class, 'ver']);
         Route::put('/{id}', [UsuarioController::class, 'actualizar']);
         Route::delete('/{id}', [UsuarioController::class, 'eliminar']);
+        Route::post('/cambiar-password', [UsuarioController::class, 'cambiarPassword']);
+            Route::put('/{id}/restablecer-contrasena', [UsuarioController::class, 'restablecerContrasena']);
+
 
     });
 
