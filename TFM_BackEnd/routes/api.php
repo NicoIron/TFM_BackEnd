@@ -15,7 +15,7 @@ use App\Http\Controllers\NotificacionesController;
 
 Route::get('/debug', fn() => response()->json(['ok' => true]));
 
-// ✅ Usar la clase del middleware directamente
+//  Usar la clase del middleware directamente
 Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function () {
 
     // ORGANIZACIONES
