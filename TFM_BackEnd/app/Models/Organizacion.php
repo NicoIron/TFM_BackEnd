@@ -11,6 +11,10 @@ class Organizacion extends Model
 
     protected $table = 'organizacion';
 
+    protected $primaryKey = 'id_organizacion';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
         'id_organizacion',
         'nombre_organizacion',

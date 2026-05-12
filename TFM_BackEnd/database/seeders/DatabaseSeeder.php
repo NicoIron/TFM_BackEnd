@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             OrganizacionSeeder::class,
             JerarquiaInicialSeeder::class,
             RolesSeeder::class,
+            JerarquiaRolSeeder::class,
             UsuarioSeeder::class,
         ]);
     }
