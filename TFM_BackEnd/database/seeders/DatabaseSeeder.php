@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
             RolesSeeder::class,
             JerarquiaRolSeeder::class,
             UsuarioSeeder::class,
+            ProyectosSeeder::class,        // ← nuevo
+            ProyectoUsuariosSeeder::class, // ← nuevo
         ]);
     }
 }

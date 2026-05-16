@@ -50,6 +50,7 @@ class TicketsController extends Controller
             'id_ticket'        => 'required|unique:tickets,id_ticket',
             'id_organizacion'  => 'required|exists:organizacion,id_organizacion',
             'id_usuario'       => 'required|exists:usuarios,id_usuario',
+            'id_proyecto'      => 'required|exists:proyectos,id_proyecto', // ← nuevo
             'id_tipo_producto' => 'required|exists:tipo_productos,id_producto',
             'monto'            => 'nullable|numeric|min:0',
             'proyecto'         => 'nullable|string',
@@ -68,6 +69,7 @@ class TicketsController extends Controller
                 'id_ticket',
                 'id_organizacion',
                 'id_usuario',
+                'id_proyecto',      // ← nuevo
                 'id_tipo_producto',
                 'monto',
                 'proyecto',
@@ -77,78 +79,57 @@ class TicketsController extends Controller
             $ticketData['estado_ticket'] = 'pendiente';
             $ticketData['fecha_cierre'] = null;
 
-            // LÓGICA PARA ASIGNAR APROBADOR CON ESCALAMIENTO POR NIVEL
             $usuario = Usuario::with('rol')->where('id_usuario', $request->id_usuario)->first();
 
             if ($usuario && $usuario->rol) {
-                Log::info("Usuario encontrado: {$usuario->id_usuario}, Rol: {$usuario->rol->nombre_rol} (Nivel: {$usuario->rol->nivel})");
-
-                $aprobadorAsignado = false;
-                $nivelUsuario = $usuario->rol->nivel;
-
-                // CONVERTIR id_organizacion A STRING PARA POSTGRESQL
                 $idOrganizacion = (string)$request->id_organizacion;
+                $idProyecto = $request->id_proyecto;
 
-                // PASO 1: Intentar asignar según jerarquía específica (id_rol_superior)
+                // PASO 1: Superior directo por jerarquia_roles dentro del proyecto
                 $relacionJerarquica = JerarquiaRol::where('id_rol', $usuario->rol->id)->first();
 
                 if ($relacionJerarquica && $relacionJerarquica->id_rol_superior) {
-                    Log::info("Buscando usuario con rol superior específico ID: {$relacionJerarquica->id_rol_superior}");
-
                     $aprobador = Usuario::where('id_rol', $relacionJerarquica->id_rol_superior)
-                        ->where('id_organizacion', $idOrganizacion) // FIX: Casting a string
+                        ->where('id_organizacion', $idOrganizacion)
+                        ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
                         ->whereNull('deleted_at')
                         ->first();
 
                     if ($aprobador) {
                         $ticketData['id_aprobador'] = $aprobador->id_usuario;
-                        Log::info("Aprobador asignado (jerarquía específica): {$aprobador->id_usuario} ({$aprobador->nombre})");
-                        $aprobadorAsignado = true;
-                    } else {
-                        Log::warning("No se encontró usuario con rol superior específico. Buscando por nivel.");
                     }
                 }
 
-                // PASO 2: Si no se encontró por jerarquía específica, buscar por NIVEL
-                if (!$aprobadorAsignado) {
-                    for ($nivelBuscado = $nivelUsuario - 1; $nivelBuscado >= 1; $nivelBuscado--) {
-                        Log::info("Buscando usuarios con nivel {$nivelBuscado}");
+                // PASO 2: Si no hay superior directo, buscar por nivel dentro del proyecto
+                if (!isset($ticketData['id_aprobador'])) {
+                    $nivelUsuario = $usuario->rol->nivel;
 
-                        $aprobador = Usuario::whereHas('rol', function($query) use ($nivelBuscado) {
-                            $query->where('nivel', $nivelBuscado);
-                        })
-                        ->where('id_organizacion', $idOrganizacion) // FIX: Casting a string
-                        ->whereNull('deleted_at')
-                        ->first();
+                    for ($nivelBuscado = $nivelUsuario - 1; $nivelBuscado >= 1; $nivelBuscado--) {
+                        $aprobador = Usuario::whereHas('rol', fn($q) => $q->where('nivel', $nivelBuscado))
+                            ->where('id_organizacion', $idOrganizacion)
+                            ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
+                            ->whereNull('deleted_at')
+                            ->first();
 
                         if ($aprobador) {
                             $ticketData['id_aprobador'] = $aprobador->id_usuario;
-                            Log::info("Aprobador asignado (por nivel {$nivelBuscado}): {$aprobador->id_usuario} ({$aprobador->nombre})");
-                            $aprobadorAsignado = true;
                             break;
-                        } else {
-                            Log::warning("No se encontró usuario con nivel {$nivelBuscado}. Continuando búsqueda.");
                         }
                     }
                 }
 
-                // PASO 3: Si aún no se encontró, asignar a Comité Operativo
-                if (!$aprobadorAsignado) {
-                    Log::warning("No se encontró aprobador en ningún nivel. Asignando a Comité Operativo.");
-                    $comiteOperativo = Usuario::whereHas('rol', function($query) {
-                        $query->where('nombre_rol', 'Comite Operativo');
-                    })
-                    ->where('id_organizacion', $idOrganizacion) // FIX: Casting a string
-                    ->whereNull('deleted_at')
-                    ->first();
+                // PASO 3: Fallback — Comite Operativo de la organización
+                if (!isset($ticketData['id_aprobador'])) {
+                    $comiteOperativo = Usuario::whereHas('rol', fn($q) => $q->where('nombre_rol', 'Comite Operativo'))
+                        ->where('id_organizacion', $idOrganizacion)
+                        ->whereNull('deleted_at')
+                        ->first();
 
                     if ($comiteOperativo) {
                         $ticketData['id_aprobador'] = $comiteOperativo->id_usuario;
-                        Log::info("Ticket asignado al Comité Operativo (fallback): {$comiteOperativo->id_usuario}");
-                    } else {
-                        Log::error("ERROR CRÍTICO: No se encontró Comité Operativo. Ticket sin aprobador.");
                     }
                 }
+                // FIN PASOS
             }
 
             $ticket = Tickets::create($ticketData);
@@ -156,23 +137,23 @@ class TicketsController extends Controller
             // NOTIFICAR AL APROBADOR ASIGNADO
             if (isset($ticketData['id_aprobador'])) {
                 NotificacionesController::crearNotificacion([
-                    'id_usuario' => $ticketData['id_aprobador'],
+                    'id_usuario'     => $ticketData['id_aprobador'],
                     'id_organizacion' => $ticket->id_organizacion,
-                    'tipo' => 'ticket_asignado',
-                    'titulo' => 'Nuevo ticket asignado',
-                    'mensaje' => "Se te ha asignado el ticket {$ticket->id_ticket} para aprobación. Solicitante: {$usuario->nombre} {$usuario->apellido}",
-                    'id_ticket' => $ticket->id_ticket
+                    'tipo'           => 'ticket_asignado',
+                    'titulo'         => 'Nuevo ticket asignado',
+                    'mensaje'        => "Se te ha asignado el ticket {$ticket->id_ticket} para aprobación. Solicitante: {$usuario->nombre} {$usuario->apellido}",
+                    'id_ticket'      => $ticket->id_ticket
                 ]);
             }
 
-            // Registrar log de creación
+            // REGISTRAR LOG
             $logRequest = new Request([
                 'id_ticket_log' => 'LOG-' . uniqid(),
-                'id_ticket' => $ticket->id_ticket,
-                'id_usuario' => $request->id_usuario,
+                'id_ticket'     => $ticket->id_ticket,
+                'id_usuario'    => $request->id_usuario,
                 'estado_anterior' => null,
-                'estado_nuevo' => 'pendiente',
-                'fecha_cambio' => now()
+                'estado_nuevo'  => 'pendiente',
+                'fecha_cambio'  => now()
             ]);
 
             $this->ticketsLogsController->guardar($logRequest);
@@ -181,7 +162,6 @@ class TicketsController extends Controller
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket creado correctamente');
             return response()->json($response, 201);
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al crear el ticket: ' . $e->getMessage());
@@ -205,7 +185,6 @@ class TicketsController extends Controller
             $response->setData($ticket);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket encontrado');
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener el ticket: ' . $e->getMessage());
@@ -261,7 +240,6 @@ class TicketsController extends Controller
             $response->setData($ticket);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket actualizado correctamente');
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al actualizar el ticket: ' . $e->getMessage());
@@ -337,7 +315,6 @@ class TicketsController extends Controller
             $response->setData($ticket);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Estado del ticket actualizado correctamente');
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al actualizar el ticket: ' . $e->getMessage());
@@ -377,7 +354,6 @@ class TicketsController extends Controller
 
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket eliminado correctamente');
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al eliminar el ticket: ' . $e->getMessage());
@@ -390,12 +366,12 @@ class TicketsController extends Controller
     {
         $response = new ResultResponse();
 
-        try{
+        try {
             $tickets = Tickets::with(['organizacion', 'tipoProducto'])
                 ->where('id_usuario', $id_usuario)
                 ->get();
 
-            if($tickets->isEmpty()) {
+            if ($tickets->isEmpty()) {
                 $response->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUND_CODE);
                 $response->setMessage('No se encontraron tickets para el usuario especificado');
                 return response()->json($response, $response->getStatusCode());
@@ -403,7 +379,7 @@ class TicketsController extends Controller
             $response->setData($tickets);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Tickets del usuario obtenidos correctamente');
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener los tickets del usuario: ' . $e->getMessage());
         }
@@ -413,11 +389,12 @@ class TicketsController extends Controller
 
     public function escalar(Request $request)
     {
+
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_ticket' => 'required|exists:tickets,id_ticket',
-            'id_usuario_actual' => 'required|exists:usuarios,id_usuario'
+            'id_ticket' => 'required|exist:tickets,id_ticket',
+            'id_usuario_actual' => 'requried|exist:usuario,id_usuario'
         ]);
 
         if ($validator->fails()) {
@@ -450,23 +427,43 @@ class TicketsController extends Controller
                 return response()->json($response, $response->getStatusCode());
             }
 
-            $nivelActual = $usuarioActual->rol->nivel;
-
-            // CONVERTIR id_organizacion A STRING PARA POSTGRESQL
+            $nivelActual  = $usuarioActual->rol->nivel;
             $idOrganizacion = (string)$ticket->id_organizacion;
+            $idProyecto   = $ticket->id_proyecto;
+            $nuevoAprobador = null;
 
-            // BUSCAR EL SIGUIENTE NIVEL SUPERIOR (nivel más bajo, más cercano al nivel 1)
-            // FIX: Usar join explícito para evitar problemas de casting
-            $nuevoAprobador = Usuario::join('roles', function($join) {
-                $join->on(DB::raw('CAST(usuarios.id_rol AS VARCHAR)'), '=', DB::raw('CAST(roles.id_rol AS VARCHAR)'));
-            })
-            ->where('roles.nivel', '<', $nivelActual)
-            ->where('usuarios.id_organizacion', $idOrganizacion)
-            ->whereNull('usuarios.deleted_at')
-            ->whereNull('roles.deleted_at')
-            ->orderBy('roles.nivel', 'DESC')
-            ->select('usuarios.*')
-            ->first();
+            // PASO 1: Superior directo por jerarquia_roles dentro del proyecto
+            $relacionJerarquica = JerarquiaRol::where('id_rol', $usuarioActual->rol->id)->first();
+
+            if ($relacionJerarquica && $relacionJerarquica->id_rol_superior) {
+                $nuevoAprobador = Usuario::where('id_rol', $relacionJerarquica->id_rol_superior)
+                    ->where('id_organizacion', $idOrganizacion)
+                    ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
+                    ->whereNull('deleted_at')
+                    ->first();
+            }
+
+            // PASO 2: Si no hay superior directo, buscar por nivel dentro del proyecto
+            if (!$nuevoAprobador) {
+                for ($nivelBuscado = $nivelActual - 1; $nivelBuscado >= 1; $nivelBuscado--) {
+                    $nuevoAprobador = Usuario::whereHas('rol', fn($q) => $q->where('nivel', $nivelBuscado))
+                        ->where('id_organizacion', $idOrganizacion)
+                        ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
+                        ->whereNull('deleted_at')
+                        ->first();
+
+                    if ($nuevoAprobador) break;
+                }
+            }
+
+            // PASO 3: Fallback — Comite Operativo de la organización
+            if (!$nuevoAprobador) {
+                $nuevoAprobador = Usuario::whereHas('rol', fn($q) => $q->where('nombre_rol', 'Comite Operativo'))
+                    ->where('id_organizacion', $idOrganizacion)
+                    ->whereNull('deleted_at')
+                    ->first();
+            }
+            // FIN PASOS
 
             if (!$nuevoAprobador) {
                 $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
@@ -474,40 +471,41 @@ class TicketsController extends Controller
                 return response()->json($response, $response->getStatusCode());
             }
 
-            $estadoAnterior = $ticket->estado_ticket;
+            $estadoAnterior  = $ticket->estado_ticket;
             $aprobadorAnterior = $ticket->id_aprobador;
 
             $ticket->estado_ticket = 'en_revision';
-            $ticket->id_aprobador = $nuevoAprobador->id_usuario;
+            $ticket->id_aprobador  = $nuevoAprobador->id_usuario;
             $ticket->save();
 
             // NOTIFICAR AL NUEVO APROBADOR
             NotificacionesController::crearNotificacion([
-                'id_usuario' => $nuevoAprobador->id_usuario,
+                'id_usuario'      => $nuevoAprobador->id_usuario,
                 'id_organizacion' => $ticket->id_organizacion,
-                'tipo' => 'ticket_escalado',
-                'titulo' => 'Ticket escalado a ti',
-                'mensaje' => "Se te ha escalado el ticket {$ticket->id_ticket} para aprobación",
-                'id_ticket' => $ticket->id_ticket
+                'tipo'            => 'ticket_escalado',
+                'titulo'          => 'Ticket escalado a ti',
+                'mensaje'         => "Se te ha escalado el ticket {$ticket->id_ticket} para aprobación",
+                'id_ticket'       => $ticket->id_ticket
             ]);
 
             // NOTIFICAR AL CREADOR DEL TICKET
             NotificacionesController::crearNotificacion([
-                'id_usuario' => $ticket->id_usuario,
+                'id_usuario'      => $ticket->id_usuario,
                 'id_organizacion' => $ticket->id_organizacion,
-                'tipo' => 'ticket_escalado_info',
-                'titulo' => 'Tu ticket fue escalado',
-                'mensaje' => "Tu ticket {$ticket->id_ticket} fue escalado a un nivel superior de aprobación",
-                'id_ticket' => $ticket->id_ticket
+                'tipo'            => 'ticket_escalado_info',
+                'titulo'          => 'Tu ticket fue escalado',
+                'mensaje'         => "Tu ticket {$ticket->id_ticket} fue escalado a un nivel superior de aprobación",
+                'id_ticket'       => $ticket->id_ticket
             ]);
 
+            // REGISTRAR LOG
             $logRequest = new Request([
-                'id_ticket_log' => 'LOG-' . uniqid(),
-                'id_ticket' => $ticket->id_ticket,
-                'id_usuario' => $request->id_usuario_actual,
+                'id_ticket_log'  => 'LOG-' . uniqid(),
+                'id_ticket'      => $ticket->id_ticket,
+                'id_usuario'     => $request->id_usuario_actual,
                 'estado_anterior' => $estadoAnterior,
-                'estado_nuevo' => 'en_revision',
-                'fecha_cambio' => now()
+                'estado_nuevo'   => 'en_revision',
+                'fecha_cambio'   => now()
             ]);
 
             $this->ticketsLogsController->guardar($logRequest);
@@ -518,12 +516,11 @@ class TicketsController extends Controller
                 'ticket' => $ticket,
                 'nuevo_aprobador' => [
                     'id_usuario' => $nuevoAprobador->id_usuario,
-                    'nombre' => $nuevoAprobador->nombre . ' ' . $nuevoAprobador->apellido
+                    'nombre'     => $nuevoAprobador->nombre . ' ' . $nuevoAprobador->apellido
                 ]
             ]);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Ticket escalado correctamente');
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al escalar el ticket: ' . $e->getMessage());
@@ -547,7 +544,6 @@ class TicketsController extends Controller
             $response->setData($tickets);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Tickets del aprobador obtenidos correctamente');
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener los tickets: ' . $e->getMessage());
@@ -609,9 +605,9 @@ class TicketsController extends Controller
 
             $ticketsEscalados = (clone $queryLogs)
                 ->where('estado_nuevo', 'en_revision')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('estado_anterior', '!=', 'en_revision')
-                          ->orWhereNull('estado_anterior');
+                        ->orWhereNull('estado_anterior');
                 })
                 ->distinct()
                 ->count('id_ticket');
@@ -632,7 +628,6 @@ class TicketsController extends Controller
             $response->setData($estadisticas);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Estadísticas obtenidas correctamente');
-
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener estadísticas: ' . $e->getMessage());

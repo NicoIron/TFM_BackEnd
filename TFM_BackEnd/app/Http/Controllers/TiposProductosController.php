@@ -21,7 +21,6 @@ class TiposProductosController extends Controller
             $response->setMessage('Error al listar los tipos de producto: ' . $e->getMessage());
         }
         return response()->json($response);
-
     }
 
     public function guardar(Request $request)
@@ -30,7 +29,7 @@ class TiposProductosController extends Controller
 
         $validated = $request->validate([
             'id_producto' => 'required|string|max:50',
-            'id_organizacion' => 'required|string',
+            'id_organizacion' => 'required|string|exists:organizacion,id_organizacion',
             'nombre_producto' => 'required|string',
             'descripcion' => 'nullable|string',
         ]);

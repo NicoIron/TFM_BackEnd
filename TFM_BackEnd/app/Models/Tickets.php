@@ -16,6 +16,7 @@ class Tickets extends Model
         'id_organizacion',
         'id_usuario',
         'id_aprobador',
+        'id_proyecto',
         'id_tipo_producto',
         'monto',
         'proyecto',
@@ -46,5 +47,11 @@ class Tickets extends Model
     public function aprobador()
     {
         return $this->belongsTo(Usuario::class, 'id_aprobador', 'id_usuario');
+    }
+
+    // Relación con proyecto
+    public function proyecto()
+    {
+        return $this->belongsTo(Proyectos::class, 'id_proyecto', 'id_proyecto');
     }
 }

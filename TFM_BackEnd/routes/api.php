@@ -13,6 +13,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Middleware\NoCacheMiddleware;
 use App\Http\Controllers\NotificacionesController;
 
+use App\Http\Controllers\ProyectosController;
+
 Route::get('/debug', fn() => response()->json(['ok' => true]));
 
 //  Usar la clase del middleware directamente
@@ -36,9 +38,7 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::put('/{id}', [UsuarioController::class, 'actualizar']);
         Route::delete('/{id}', [UsuarioController::class, 'eliminar']);
         Route::post('/cambiar-password', [UsuarioController::class, 'cambiarPassword']);
-            Route::put('/{id}/restablecer-contrasena', [UsuarioController::class, 'restablecerContrasena']);
-
-
+        Route::put('/{id}/restablecer-contrasena', [UsuarioController::class, 'restablecerContrasena']);
     });
 
     // JERARQUÍAS INICIALES
@@ -57,6 +57,16 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::get('/{id}', [RolesController::class, 'ver']);
         Route::put('/{id}', [RolesController::class, 'actualizar']);
         Route::delete('/{id}', [RolesController::class, 'eliminar']);
+    });
+
+
+    // PROYECTOS
+    Route::prefix('proyectos')->group(function () {
+        Route::get('/organizacion/{id_organizacion}', [ProyectosController::class, 'listar']);
+        Route::get('/usuario/{id_usuario}', [ProyectosController::class, 'listarPorUsuario']);
+        Route::post('/', [ProyectosController::class, 'guardar']);
+        Route::post('/asignar-usuario', [ProyectosController::class, 'asignarUsuario']);
+        Route::delete('/quitar-usuario', [ProyectosController::class, 'quitarUsuario']);
     });
 
     // JERARQUÍA ROLES
@@ -102,22 +112,20 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::get('/{id}', [TicketsLogsController::class, 'ver']);
         Route::put('/{id}', [TicketsLogsController::class, 'actualizar']);
         Route::delete('/{id}', [TicketsLogsController::class, 'eliminar']);
-
     });
 
     // NOTIFICACIONES
-Route::prefix('notificaciones')->group(function () {
-    Route::get('/{id_usuario}', [NotificacionesController::class, 'obtenerNotificaciones']);
-    Route::get('/{id_usuario}/count', [NotificacionesController::class, 'contarNoLeidas']);
-    Route::put('/{id}/leida', [NotificacionesController::class, 'marcarComoLeida']);
-    Route::put('/{id_usuario}/leer-todas', [NotificacionesController::class, 'marcarTodasComoLeidas']);
-});
+    Route::prefix('notificaciones')->group(function () {
+        Route::get('/{id_usuario}', [NotificacionesController::class, 'obtenerNotificaciones']);
+        Route::get('/{id_usuario}/count', [NotificacionesController::class, 'contarNoLeidas']);
+        Route::put('/{id}/leida', [NotificacionesController::class, 'marcarComoLeida']);
+        Route::put('/{id_usuario}/leer-todas', [NotificacionesController::class, 'marcarTodasComoLeidas']);
+    });
 
     // LOGOUT
     Route::prefix('logout')->group(function () {
         Route::post('/', [AuthController::class, 'logout']);
     });
-
 });
 
 // LOGIN

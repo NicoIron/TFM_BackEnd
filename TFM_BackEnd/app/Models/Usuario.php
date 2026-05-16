@@ -61,4 +61,9 @@ class Usuario extends Authenticatable
     {
         return $this->password_hash;
     }
+
+    public function proyectos()
+    {
+        return $this->hasMany(ProyectoUsuario::class, 'id_usuario', 'id_usuario');
+    }
 }

@@ -13,6 +13,8 @@ return new class extends Migration
             $table->string('id_ticket', 50)->unique();
             $table->string('id_organizacion', 50);
             $table->string('id_usuario', 50);
+            $table->string('id_aprobador', 50)->nullable();
+            $table->string('id_proyecto', 50);
             $table->string('id_tipo_producto', 50);
             $table->decimal('monto', 15, 2)->nullable();
             $table->text('proyecto')->nullable();
@@ -23,15 +25,18 @@ return new class extends Migration
             $table->foreign('id_usuario')
                 ->references('id_usuario')->on('usuarios')
                 ->onDelete('restrict');
+            $table->foreign('id_aprobador')
+                ->references('id_usuario')->on('usuarios')
+                ->onDelete('restrict');
+            $table->foreign('id_proyecto')
+                ->references('id_proyecto')->on('proyectos')
+                ->onDelete('restrict');
             $table->foreign('id_tipo_producto')
                 ->references('id_producto')->on('tipo_productos')
                 ->onDelete('restrict');
             $table->foreign('id_organizacion')
                 ->references('id_organizacion')->on('organizacion')
                 ->onDelete('restrict');
-
-                // Aquí la restricción de unicidad para usuario + producto
-            $table->unique(['id_usuario', 'id_tipo_producto']);
 
             $table->timestamps();
             $table->softDeletes();
@@ -43,7 +48,3 @@ return new class extends Migration
         Schema::dropIfExists('tickets');
     }
 };
-
-
-
-

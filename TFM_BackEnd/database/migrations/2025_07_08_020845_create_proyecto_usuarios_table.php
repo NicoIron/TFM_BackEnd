@@ -8,20 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('tickets_logs', function (Blueprint $table) {
+        Schema::create('proyecto_usuarios', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('id_ticket_log', 50)->unique();
-            $table->string('id_ticket', 50);
+            $table->string('id_proyecto', 50);
             $table->string('id_usuario', 50);
-            $table->string('estado_anterior', 50)->nullable();
-            $table->string('estado_nuevo', 50);
-            $table->timestamp('fecha_cambio')->nullable();
-            $table->foreign('id_ticket')
-                ->references('id_ticket')->on('tickets')
+            $table->string('id_organizacion', 50);
+            $table->foreign('id_proyecto')
+                ->references('id_proyecto')->on('proyectos')
                 ->onDelete('restrict');
             $table->foreign('id_usuario')
                 ->references('id_usuario')->on('usuarios')
                 ->onDelete('restrict');
+            $table->foreign('id_organizacion')
+                ->references('id_organizacion')->on('organizacion')
+                ->onDelete('restrict');
+            $table->unique(['id_proyecto', 'id_usuario']);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +30,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('tickets_logs');
+        Schema::dropIfExists('proyecto_usuarios');
     }
 };
