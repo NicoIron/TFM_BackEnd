@@ -39,6 +39,7 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::delete('/{id}', [UsuarioController::class, 'eliminar']);
         Route::post('/cambiar-password', [UsuarioController::class, 'cambiarPassword']);
         Route::put('/{id}/restablecer-contrasena', [UsuarioController::class, 'restablecerContrasena']);
+        Route::post('/validar-password', [UsuarioController::class, 'validarPassword']);
     });
 
     // JERARQUÍAS INICIALES

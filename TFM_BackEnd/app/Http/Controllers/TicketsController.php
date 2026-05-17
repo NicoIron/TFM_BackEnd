@@ -10,8 +10,6 @@ use App\Models\Usuario;
 use App\Http\Controllers\TicketsLogsController;
 use Illuminate\Support\Facades\Log;
 use App\Models\JerarquiaRol;
-use Illuminate\Support\Facades\DB;
-use PHPUnit\Framework\Attributes\Ticket;
 use App\Models\TicketsLogs;
 use App\Http\Controllers\NotificacionesController;
 
@@ -393,8 +391,8 @@ class TicketsController extends Controller
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_ticket' => 'required|exist:tickets,id_ticket',
-            'id_usuario_actual' => 'requried|exist:usuario,id_usuario'
+            'id_ticket' => 'required|exists:tickets,id_ticket',
+            'id_usuario_actual' => 'requried|exists:usuario,id_usuario'
         ]);
 
         if ($validator->fails()) {

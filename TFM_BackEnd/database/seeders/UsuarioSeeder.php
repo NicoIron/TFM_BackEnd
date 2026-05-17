@@ -22,6 +22,18 @@ class UsuarioSeeder extends Seeder
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 1,
             ],
+            //Usuario Transversal
+            [
+                'id_usuario'      => 'USR-COMITE',
+                'nombre'          => 'Ana',
+                'apellido'        => 'Torres',
+                'email'           => 'ana.torres@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'ana.torres',
+                'id_rol'          => 2,  // Comite Operativo
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 2,
+            ],
             // Proyecto A
             [
                 'id_usuario'      => 'USR-JEFETI-A',
@@ -79,17 +91,6 @@ class UsuarioSeeder extends Seeder
                 'id_jerarquia'    => 14,
             ],
             // Proyecto B
-            [
-                'id_usuario'      => 'USR-COMITE-B',
-                'nombre'          => 'Ana',
-                'apellido'        => 'Torres',
-                'email'           => 'ana.torres@demo.com',
-                'password_hash'   => bcrypt('123456'),
-                'username'        => 'ana.torres',
-                'id_rol'          => 2,  // Comite Operativo
-                'id_organizacion' => 'Google',
-                'id_jerarquia'    => 2,
-            ],
             [
                 'id_usuario'      => 'USR-JEFETI-B',
                 'nombre'          => 'Roberto',

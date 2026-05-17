@@ -17,12 +17,26 @@ class UsuarioController extends Controller
     /**
      *  Listar todos los usuarios con sus relaciones (rol, organización y jerarquía).
      */
-    public function listar()
+    public function listar(Request $request)
     {
         $response = new ResultResponse();
 
         try {
-            $usuarios = Usuario::with(['rol', 'organizacion', 'jerarquia'])->get();
+            $query = Usuario::with(['rol', 'organizacion', 'jerarquia']);
+
+            // Filtro de búsqueda
+            if ($request->busqueda) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('nombre', 'ilike', "%{$request->busqueda}%")
+                        ->orWhere('apellido', 'ilike', "%{$request->busqueda}%")
+                        ->orWhere('email', 'ilike', "%{$request->busqueda}%")
+                        ->orWhere('id_usuario', 'ilike', "%{$request->busqueda}%");
+                });
+            }
+
+            // Paginación
+            $porPagina = $request->por_pagina ?? 20;
+            $usuarios = $query->paginate($porPagina);
 
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
             $response->setMessage('Listado de usuarios obtenido correctamente');
@@ -31,6 +45,7 @@ class UsuarioController extends Controller
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al obtener los usuarios: ' . $e->getMessage());
         }
+
 
         return response()->json($response, $response->getStatusCode());
     }
@@ -430,6 +445,43 @@ class UsuarioController extends Controller
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
             $response->setMessage('Error al restablecer contraseña: ' . $e->getMessage());
             Log::error('Error en restablecerContrasena: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
+    }
+
+    public function validarPassword(Request $request)
+    {
+        $response = new ResultResponse();
+
+        $validator = Validator::make($request->all(), [
+            'id_usuario' => 'required|string|exists:usuarios,id_usuario',
+            'password'   => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+            $response->setMessage('Error en la validación.');
+            $response->setData($validator->errors());
+            return response()->json($response, $response->getStatusCode());
+        }
+
+        try {
+            $usuario = Usuario::where('id_usuario', $request->id_usuario)
+                ->whereNull('deleted_at')
+                ->first();
+
+            if (!$usuario || !Hash::check($request->password, $usuario->password_hash)) {
+                $response->setStatusCode(ResultResponse::ERROR_VALIDATION_CODE);
+                $response->setMessage('Contraseña incorrecta');
+                return response()->json($response, $response->getStatusCode());
+            }
+
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Contraseña válida');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al validar contraseña: ' . $e->getMessage());
         }
 
         return response()->json($response, $response->getStatusCode());
