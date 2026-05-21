@@ -22,19 +22,54 @@ class TicketsController extends Controller
         $this->ticketsLogsController = $ticketsLogsController;
     }
 
-    public function listar()
+    public function listar(Request $request)
     {
         $response = new ResultResponse();
 
         try {
-            $tickets = Tickets::with(['organizacion', 'usuario', 'tipoProducto', 'aprobador'])->get();
+            $query = Tickets::with(['organizacion', 'usuario', 'tipoProducto', 'aprobador', 'proyecto']);
+            if ($request->estdo) {
+                $query->where('estado_ticket', $request->estado);
+            }
 
+            //FIltrar por organizacion
+            if ($request->id_organizacion) {
+                $query->where('id_organizacion', $request->id_organizacion);
+            }
+
+            // Filtrar por proyecto
+            if ($request->id_proyecto) {
+                $query->where('id_proyecto', $request->id_proyecto);
+            }
+
+            // Filtrar por usuario creador
+            if ($request->id_usuario) {
+                $query->where('id_usuario', $request->id_usuario);
+            }
+            //Filtrar por aprobador
+            if ($request->id_aprobador) {
+                $query->where('id_aprobador', $request->id_aprobador);
+            }
+
+
+
+            //Filtrar por rango de fechas
+            if ($request->fecha_inicio && $request->fecha_fin) {
+                $query->wherebetween('created_at', [
+                    $request->fecha_inicio . '00:00:00',
+                    $request->fecha_fin . '23:59:59'
+                ]);
+            }
+
+            //paginacion
+            $porPagina = $request->por_Pagina ?? 20;
+            $tickets = $query->orderBy('created_at', 'desc')->paginate($porPagina);
             $response->setData($tickets);
             $response->setStatusCode(ResultResponse::SUCCESS_CODE);
-            $response->setMessage('Lista de tickets obtenida correctamente');
+            $response->setMessage('Tickets listados correctamente');
         } catch (\Exception $e) {
             $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
-            $response->setMessage('Error al obtener la lista de tickets: ' . $e->getMessage());
+            $response->setMessage('Error al listar los tickets: ' . $e->getMessage());
         }
 
         return response()->json($response, $response->getStatusCode());
