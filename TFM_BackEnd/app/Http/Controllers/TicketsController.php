@@ -669,4 +669,40 @@ class TicketsController extends Controller
 
         return response()->json($response, $response->getStatusCode());
     }
+
+    public function obtenerTicketsAprobados(Request $request, $id_organizacion)
+    {
+        $response = new ResultResponse();
+
+        try {
+            $query = Tickets::with(['organizacion', 'usuario', 'tipoProducto', 'aprobador', 'proyecto'])
+                ->where('id_organizacion', $id_organizacion)
+                ->where('estado_ticket', 'aprobado');
+
+            // Filtro por proyecto
+            if ($request->id_proyecto) {
+                $query->where('id_proyecto', $request->id_proyecto);
+            }
+
+            // Filtro por rango de fechas
+            if ($request->fecha_inicio && $request->fecha_fin) {
+                $query->whereBetween('created_at', [
+                    $request->fecha_inicio . ' 00:00:00',
+                    $request->fecha_fin . ' 23:59:59'
+                ]);
+            }
+
+            $porPagina = $request->por_pagina ?? 20;
+            $tickets = $query->orderBy('created_at', 'desc')->paginate($porPagina);
+
+            $response->setData($tickets);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Tickets aprobados obtenidos correctamente');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al obtener tickets aprobados: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
+    }
 }

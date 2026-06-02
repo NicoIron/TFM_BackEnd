@@ -104,6 +104,8 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::get('/{id}', [TicketsController::class, 'ver']);
         Route::put('/{id}', [TicketsController::class, 'actualizar']);
         Route::delete('/{id}', [TicketsController::class, 'eliminar']);
+
+        Route::get('/aprobados/{id_organizacion}', [TicketsController::class, 'obtenerTicketsAprobados']);
     });
 
     // LOGS DE TICKETS

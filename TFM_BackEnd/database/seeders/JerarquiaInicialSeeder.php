@@ -21,11 +21,12 @@ class JerarquiaInicialSeeder extends Seeder
             ['id_jerarquia' => 9,  'cargo' => 'Gerente de Proyecto'],
             ['id_jerarquia' => 10, 'cargo' => 'Lider Tecnico'],
             ['id_jerarquia' => 11, 'cargo' => 'Lider Qa'],
-            ['id_jerarquia' => 12, 'cargo' => 'Lider funcional'],
-            ['id_jerarquia' => 13, 'cargo' => 'Developer'],
-            ['id_jerarquia' => 14, 'cargo' => 'Automatizador'],
-            ['id_jerarquia' => 15, 'cargo' => 'Funcional'],
-            ['id_jerarquia' => 16, 'cargo' => 'Scrum'],
+            ['id_jerarquia' => 12, 'cargo' => 'Developer'],
+            ['id_jerarquia' => 13, 'cargo' => 'Automatizador'],
+            ['id_jerarquia' => 14, 'cargo' => 'Funcional'],
+            ['id_jerarquia' => 15, 'cargo' => 'Scrum'],
+            ['id_jerarquia' => 16, 'cargo' => 'Jefe de Contabilidad'],
+            ['id_jerarquia' => 17, 'cargo' => 'Contabilidad'],
         ];
 
         foreach ($jerarquias as $item) {

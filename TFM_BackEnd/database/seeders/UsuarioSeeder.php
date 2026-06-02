@@ -18,11 +18,12 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'admin@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'admin',
-                'id_rol'          => 1,  // Admin
+                'id_rol'          => 1,
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 1,
             ],
-            //Usuario Transversal
+
+            // Transversal
             [
                 'id_usuario'      => 'USR-COMITE',
                 'nombre'          => 'Ana',
@@ -30,11 +31,45 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'ana.torres@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'ana.torres',
-                'id_rol'          => 2,  // Comite Operativo
+                'id_rol'          => 2,
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 2,
             ],
-            // Proyecto A
+            [
+                'id_usuario'      => 'USR-JEFE-CONTA',
+                'nombre'          => 'Ricardo',
+                'apellido'        => 'Fuentes',
+                'email'           => 'ricardo.fuentes@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'ricardo.fuentes',
+                'id_rol'          => 16, // Jefe de Contabilidad
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 16,
+            ],
+            [
+                'id_usuario'      => 'USR-CONTA-1',
+                'nombre'          => 'Patricia',
+                'apellido'        => 'Vega',
+                'email'           => 'patricia.vega@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'patricia.vega',
+                'id_rol'          => 17, // Contabilidad
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 17,
+            ],
+            [
+                'id_usuario'      => 'USR-CONTA-2',
+                'nombre'          => 'Andres',
+                'apellido'        => 'Pinto',
+                'email'           => 'andres.pinto@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'andres.pinto',
+                'id_rol'          => 17, // Contabilidad
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 17,
+            ],
+
+            // ===== PROYECTO A =====
             [
                 'id_usuario'      => 'USR-JEFETI-A',
                 'nombre'          => 'Carlos',
@@ -42,9 +77,20 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'carlos.ramirez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'carlos.ramirez',
-                'id_rol'          => 3,  // Jefe TI
+                'id_rol'          => 3,
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 3,
+            ],
+            [
+                'id_usuario'      => 'USR-LIDERINFRA-A',
+                'nombre'          => 'Claudia',
+                'apellido'        => 'Rios',
+                'email'           => 'claudia.rios@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'claudia.rios',
+                'id_rol'          => 4,
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 4,
             ],
             [
                 'id_usuario'      => 'USR-LIDERDEV-A',
@@ -53,20 +99,75 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'maria.lopez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'maria.lopez',
-                'id_rol'          => 5,  // Lider de clan Developer
+                'id_rol'          => 5,
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 5,
             ],
             [
-                'id_usuario'      => 'USR-LIDERFUNC-A',
-                'nombre'          => 'Pedro',
-                'apellido'        => 'Gomez',
-                'email'           => 'pedro.gomez@demo.com',
+                'id_usuario'      => 'USR-LIDERIA-A',
+                'nombre'          => 'Fernando',
+                'apellido'        => 'Mora',
+                'email'           => 'fernando.mora@demo.com',
                 'password_hash'   => bcrypt('123456'),
-                'username'        => 'pedro.gomez',
-                'id_rol'          => 12, // Lider funcional
+                'username'        => 'fernando.mora',
+                'id_rol'          => 6,
                 'id_organizacion' => 'Google',
-                'id_jerarquia'    => 12,
+                'id_jerarquia'    => 6,
+            ],
+            [
+                'id_usuario'      => 'USR-LIDERCAL-A',
+                'nombre'          => 'Gloria',
+                'apellido'        => 'Peña',
+                'email'           => 'gloria.pena@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'gloria.pena',
+                'id_rol'          => 7,
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 7,
+            ],
+            [
+                'id_usuario'      => 'USR-LIDERCS-A',
+                'nombre'          => 'Hector',
+                'apellido'        => 'Suarez',
+                'email'           => 'hector.suarez@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'hector.suarez',
+                'id_rol'          => 8,
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 8,
+            ],
+            [
+                'id_usuario'      => 'USR-GERENTE-A',
+                'nombre'          => 'Isabel',
+                'apellido'        => 'Cruz',
+                'email'           => 'isabel.cruz@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'isabel.cruz',
+                'id_rol'          => 9,
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 9,
+            ],
+            [
+                'id_usuario'      => 'USR-LIDERTEC-A',
+                'nombre'          => 'Jorge',
+                'apellido'        => 'Vargas',
+                'email'           => 'jorge.vargas@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'jorge.vargas',
+                'id_rol'          => 10,
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 10,
+            ],
+            [
+                'id_usuario'      => 'USR-LIDERQA-A',
+                'nombre'          => 'Karen',
+                'apellido'        => 'Blanco',
+                'email'           => 'karen.blanco@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'karen.blanco',
+                'id_rol'          => 11,
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 11,
             ],
             [
                 'id_usuario'      => 'USR-DEV-A',
@@ -75,9 +176,9 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'juan.perez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'juan.perez',
-                'id_rol'          => 13, // Developer
+                'id_rol'          => 12, // Developer
                 'id_organizacion' => 'Google',
-                'id_jerarquia'    => 13,
+                'id_jerarquia'    => 12,
             ],
             [
                 'id_usuario'      => 'USR-AUTO-A',
@@ -86,11 +187,34 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'luis.martinez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'luis.martinez',
-                'id_rol'          => 14, // Automatizador
+                'id_rol'          => 13, // Automatizador
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 13,
+            ],
+            [
+                'id_usuario'      => 'USR-FUNC-A',
+                'nombre'          => 'Monica',
+                'apellido'        => 'Leon',
+                'email'           => 'monica.leon@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'monica.leon',
+                'id_rol'          => 14, // Funcional
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 14,
             ],
-            // Proyecto B
+            [
+                'id_usuario'      => 'USR-SCRUM-A',
+                'nombre'          => 'Nicolas',
+                'apellido'        => 'Ortiz',
+                'email'           => 'nicolas.ortiz@demo.com',
+                'password_hash'   => bcrypt('123456'),
+                'username'        => 'nicolas.ortiz',
+                'id_rol'          => 15, // Scrum
+                'id_organizacion' => 'Google',
+                'id_jerarquia'    => 15,
+            ],
+
+            // ===== PROYECTO B =====
             [
                 'id_usuario'      => 'USR-JEFETI-B',
                 'nombre'          => 'Roberto',
@@ -98,7 +222,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'roberto.silva@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'roberto.silva',
-                'id_rol'          => 3,  // Jefe TI
+                'id_rol'          => 3,
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 3,
             ],
@@ -109,7 +233,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'sofia.herrera@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'sofia.herrera',
-                'id_rol'          => 7,  // Lider de clan Calidad
+                'id_rol'          => 7,
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 7,
             ],
@@ -120,20 +244,9 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'luisa.diaz@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'luisa.diaz',
-                'id_rol'          => 11, // Lider Qa
+                'id_rol'          => 11,
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 11,
-            ],
-            [
-                'id_usuario'      => 'USR-LIDERFUNC-B',
-                'nombre'          => 'Diego',
-                'apellido'        => 'Castro',
-                'email'           => 'diego.castro@demo.com',
-                'password_hash'   => bcrypt('123456'),
-                'username'        => 'diego.castro',
-                'id_rol'          => 12, // Lider funcional
-                'id_organizacion' => 'Google',
-                'id_jerarquia'    => 12,
             ],
             [
                 'id_usuario'      => 'USR-SCRUM-B',
@@ -142,9 +255,9 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'valentina.mora@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'valentina.mora',
-                'id_rol'          => 16, // Scrum
+                'id_rol'          => 15, // Scrum
                 'id_organizacion' => 'Google',
-                'id_jerarquia'    => 16,
+                'id_jerarquia'    => 15,
             ],
         ];
 
