@@ -705,4 +705,68 @@ class TicketsController extends Controller
 
         return response()->json($response, $response->getStatusCode());
     }
+
+    public function estadisticasContabilidad(Request $request, $id_organizacion)
+    {
+        $response = new ResultResponse();
+
+        try {
+            // Total completados
+            $totalCompletados = Tickets::where('id_organizacion', $id_organizacion)
+                ->where('estado_ticket', 'completado')
+                ->count();
+
+            // Total rechazados por contabilidad
+            $totalRechazados = Tickets::where('id_organizacion', $id_organizacion)
+                ->where('estado_ticket', 'rechazado')
+                ->count();
+
+            // Total monto completados
+            $montoTotal = Tickets::where('id_organizacion', $id_organizacion)
+                ->where('estado_ticket', 'completado')
+                ->sum('monto');
+
+            // Por mes — últimos 12 meses
+            $porMes = Tickets::where('id_organizacion', $id_organizacion)
+                ->whereIn('estado_ticket', ['completado', 'rechazado'])
+                ->selectRaw("TO_CHAR(fecha_cierre, 'YYYY-MM') as mes, estado_ticket, SUM(monto) as total_monto, COUNT(*) as total_tickets")
+                ->whereNotNull('fecha_cierre')
+                ->groupBy('mes', 'estado_ticket')
+                ->orderBy('mes', 'desc')
+                ->limit(24)
+                ->get();
+
+            // Por año
+            $porAnio = Tickets::where('id_organizacion', $id_organizacion)
+                ->whereIn('estado_ticket', ['completado', 'rechazado'])
+                ->selectRaw("TO_CHAR(fecha_cierre, 'YYYY') as anio, estado_ticket, SUM(monto) as total_monto, COUNT(*) as total_tickets")
+                ->whereNotNull('fecha_cierre')
+                ->groupBy('anio', 'estado_ticket')
+                ->orderBy('anio', 'desc')
+                ->get();
+
+            // Por proyecto
+            $porProyecto = Tickets::where('id_organizacion', $id_organizacion)
+                ->whereIn('estado_ticket', ['completado', 'rechazado'])
+                ->selectRaw("id_proyecto, estado_ticket, SUM(monto) as total_monto, COUNT(*) as total_tickets")
+                ->groupBy('id_proyecto', 'estado_ticket')
+                ->get();
+
+            $response->setData([
+                'total_completados' => $totalCompletados,
+                'total_rechazados'  => $totalRechazados,
+                'monto_total'       => $montoTotal,
+                'por_mes'           => $porMes,
+                'por_anio'          => $porAnio,
+                'por_proyecto'      => $porProyecto,
+            ]);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Estadísticas de contabilidad obtenidas correctamente');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al obtener estadísticas: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
+    }
 }

@@ -143,7 +143,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'isabel.cruz@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'isabel.cruz',
-                'id_rol'          => 9,
+                'id_rol'          => 9, // Gerente proyecto
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 9,
             ],
@@ -154,7 +154,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'jorge.vargas@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'jorge.vargas',
-                'id_rol'          => 10,
+                'id_rol'          => 10, //Lider Tecnico
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 10,
             ],
@@ -165,7 +165,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'karen.blanco@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'karen.blanco',
-                'id_rol'          => 11,
+                'id_rol'          => 11, //Lider Qa
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 11,
             ],
