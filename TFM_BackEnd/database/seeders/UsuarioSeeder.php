@@ -4,14 +4,15 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Usuario;
+use App\Models\Roles;
 
 class UsuarioSeeder extends Seeder
 {
     public function run(): void
     {
-        $usuarios = [
+        $usuariosRaw = [
             // ==========================================
-            // ORGANIZACIÓN: GOOGLE
+            // ORGANIZACIÓN: GOOGLE (id_rol del 1 al 17)
             // ==========================================
 
             // Admin
@@ -22,7 +23,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'admin@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'admin',
-                'id_rol'          => 1,
+                'id_rol_codigo'   => '1',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 1,
             ],
@@ -35,7 +36,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'ana.torres@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'ana.torres',
-                'id_rol'          => 2,
+                'id_rol_codigo'   => '2',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 2,
             ],
@@ -46,7 +47,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'ricardo.fuentes@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'ricardo.fuentes',
-                'id_rol'          => 16, // Jefe de Contabilidad
+                'id_rol_codigo'   => '16', // Jefe de Contabilidad
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 16,
             ],
@@ -57,7 +58,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'patricia.vega@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'patricia.vega',
-                'id_rol'          => 17, // Contabilidad
+                'id_rol_codigo'   => '17', // Contabilidad
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 17,
             ],
@@ -68,7 +69,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'andres.pinto@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'andres.pinto',
-                'id_rol'          => 17, // Contabilidad
+                'id_rol_codigo'   => '17', // Contabilidad
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 17,
             ],
@@ -81,7 +82,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'carlos.ramirez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'carlos.ramirez',
-                'id_rol'          => 3,
+                'id_rol_codigo'   => '3',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 3,
             ],
@@ -92,7 +93,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'claudia.rios@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'claudia.rios',
-                'id_rol'          => 4,
+                'id_rol_codigo'   => '4',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 4,
             ],
@@ -103,7 +104,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'maria.lopez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'maria.lopez',
-                'id_rol'          => 5,
+                'id_rol_codigo'   => '5',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 5,
             ],
@@ -114,7 +115,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'fernando.mora@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'fernando.mora',
-                'id_rol'          => 6,
+                'id_rol_codigo'   => '6',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 6,
             ],
@@ -125,7 +126,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'gloria.pena@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'gloria.pena',
-                'id_rol'          => 7,
+                'id_rol_codigo'   => '7',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 7,
             ],
@@ -136,7 +137,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'hector.suarez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'hector.suarez',
-                'id_rol'          => 8,
+                'id_rol_codigo'   => '8',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 8,
             ],
@@ -147,7 +148,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'isabel.cruz@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'isabel.cruz',
-                'id_rol'          => 9, // Gerente proyecto
+                'id_rol_codigo'   => '9', // Gerente proyecto
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 9,
             ],
@@ -158,7 +159,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'jorge.vargas@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'jorge.vargas',
-                'id_rol'          => 10, // Lider Tecnico
+                'id_rol_codigo'   => '10', // Lider Tecnico
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 10,
             ],
@@ -169,7 +170,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'karen.blanco@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'karen.blanco',
-                'id_rol'          => 11, // Lider Qa
+                'id_rol_codigo'   => '11', // Lider Qa
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 11,
             ],
@@ -180,7 +181,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'juan.perez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'juan.perez',
-                'id_rol'          => 12, // Developer
+                'id_rol_codigo'   => '12', // Developer
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 12,
             ],
@@ -191,7 +192,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'luis.martinez@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'luis.martinez',
-                'id_rol'          => 13, // Automatizador
+                'id_rol_codigo'   => '13', // Automatizador
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 13,
             ],
@@ -202,7 +203,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'monica.leon@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'monica.leon',
-                'id_rol'          => 14, // Funcional
+                'id_rol_codigo'   => '14', // Funcional
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 14,
             ],
@@ -213,7 +214,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'nicolas.ortiz@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'nicolas.ortiz',
-                'id_rol'          => 15, // Scrum
+                'id_rol_codigo'   => '15', // Scrum
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 15,
             ],
@@ -226,7 +227,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'roberto.silva@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'roberto.silva',
-                'id_rol'          => 3,
+                'id_rol_codigo'   => '3',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 3,
             ],
@@ -237,7 +238,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'sofia.herrera@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'sofia.herrera',
-                'id_rol'          => 7,
+                'id_rol_codigo'   => '7',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 7,
             ],
@@ -248,7 +249,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'luisa.diaz@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'luisa.diaz',
-                'id_rol'          => 11,
+                'id_rol_codigo'   => '11',
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 11,
             ],
@@ -259,13 +260,13 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'valentina.mora@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'valentina.mora',
-                'id_rol'          => 15, // Scrum
+                'id_rol_codigo'   => '15', // Scrum
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => 15,
             ],
 
             // ==========================================
-            // ORGANIZACIÓN: FACEBOOK
+            // ORGANIZACIÓN: FACEBOOK (id_rol del 101 al 117)
             // ==========================================
 
             // Admin
@@ -276,7 +277,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'admin.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'admin.facebook',
-                'id_rol'          => 1,
+                'id_rol_codigo'   => '101', // Admin Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 1,
             ],
@@ -289,7 +290,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'ana.torres.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'ana.torres.facebook',
-                'id_rol'          => 2,
+                'id_rol_codigo'   => '102', // Comite Operativo Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 2,
             ],
@@ -300,7 +301,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'ricardo.fuentes.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'ricardo.fuentes.facebook',
-                'id_rol'          => 16, // Jefe de Contabilidad
+                'id_rol_codigo'   => '116', // Jefe de Contabilidad Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 16,
             ],
@@ -311,7 +312,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'patricia.vega.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'patricia.vega.facebook',
-                'id_rol'          => 17, // Contabilidad
+                'id_rol_codigo'   => '117', // Contabilidad Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 17,
             ],
@@ -322,7 +323,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'andres.pinto.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'andres.pinto.facebook',
-                'id_rol'          => 17, // Contabilidad
+                'id_rol_codigo'   => '117', // Contabilidad Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 17,
             ],
@@ -335,7 +336,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'carlos.ramirez.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'carlos.ramirez.facebook',
-                'id_rol'          => 3,
+                'id_rol_codigo'   => '103', // Jefe TI Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 3,
             ],
@@ -346,7 +347,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'claudia.rios.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'claudia.rios.facebook',
-                'id_rol'          => 4,
+                'id_rol_codigo'   => '104', // Lider Infraestructura Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 4,
             ],
@@ -357,7 +358,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'maria.lopez.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'maria.lopez.facebook',
-                'id_rol'          => 5,
+                'id_rol_codigo'   => '105', // Lider Developer Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 5,
             ],
@@ -368,7 +369,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'fernando.mora.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'fernando.mora.facebook',
-                'id_rol'          => 6,
+                'id_rol_codigo'   => '106', // Lider IA Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 6,
             ],
@@ -379,7 +380,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'gloria.pena.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'gloria.pena.facebook',
-                'id_rol'          => 7,
+                'id_rol_codigo'   => '107', // Lider Calidad Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 7,
             ],
@@ -390,7 +391,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'hector.suarez.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'hector.suarez.facebook',
-                'id_rol'          => 8,
+                'id_rol_codigo'   => '108', // Lider CS Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 8,
             ],
@@ -401,7 +402,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'isabel.cruz.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'isabel.cruz.facebook',
-                'id_rol'          => 9, // Gerente proyecto
+                'id_rol_codigo'   => '109', // Gerente proyecto Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 9,
             ],
@@ -412,7 +413,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'jorge.vargas.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'jorge.vargas.facebook',
-                'id_rol'          => 10, // Lider Tecnico
+                'id_rol_codigo'   => '110', // Lider Tecnico Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 10,
             ],
@@ -423,7 +424,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'karen.blanco.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'karen.blanco.facebook',
-                'id_rol'          => 11, // Lider Qa
+                'id_rol_codigo'   => '111', // Lider Qa Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 11,
             ],
@@ -434,7 +435,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'juan.perez.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'juan.perez.facebook',
-                'id_rol'          => 12, // Developer
+                'id_rol_codigo'   => '112', // Developer Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 12,
             ],
@@ -445,7 +446,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'luis.martinez.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'luis.martinez.facebook',
-                'id_rol'          => 13, // Automatizador
+                'id_rol_codigo'   => '113', // Automatizador Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 13,
             ],
@@ -456,7 +457,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'monica.leon.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'monica.leon.facebook',
-                'id_rol'          => 14, // Funcional
+                'id_rol_codigo'   => '114', // Funcional Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 14,
             ],
@@ -467,7 +468,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'nicolas.ortiz.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'nicolas.ortiz.facebook',
-                'id_rol'          => 15, // Scrum
+                'id_rol_codigo'   => '115', // Scrum Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 15,
             ],
@@ -480,7 +481,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'roberto.silva.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'roberto.silva.facebook',
-                'id_rol'          => 3,
+                'id_rol_codigo'   => '103', // Jefe TI Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 3,
             ],
@@ -491,7 +492,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'sofia.herrera.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'sofia.herrera.facebook',
-                'id_rol'          => 7,
+                'id_rol_codigo'   => '107', // Lider Calidad Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 7,
             ],
@@ -502,7 +503,7 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'luisa.diaz.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'luisa.diaz.facebook',
-                'id_rol'          => 11,
+                'id_rol_codigo'   => '111', // Lider QA Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 11,
             ],
@@ -513,14 +514,25 @@ class UsuarioSeeder extends Seeder
                 'email'           => 'valentina.mora.facebook@demo.com',
                 'password_hash'   => bcrypt('123456'),
                 'username'        => 'valentina.mora.facebook',
-                'id_rol'          => 15, // Scrum
+                'id_rol_codigo'   => '115', // Scrum Facebook
                 'id_organizacion' => 'Facebook',
                 'id_jerarquia'    => 15,
             ],
         ];
 
-        foreach ($usuarios as $usuario) {
-            Usuario::create($usuario);
+        foreach ($usuariosRaw as $uRaw) {
+            // Se busca la clave primaria autoincremental de roles
+            $rolRegistro = Roles::where('id_rol', (string)$uRaw['id_rol_codigo'])
+                ->where('id_organizacion', $uRaw['id_organizacion'])
+                ->first();
+
+            if ($rolRegistro) {
+                $datosFinales = $uRaw;
+                $datosFinales['id_rol'] = $rolRegistro->id; // Guarda la clave autoincremental (bigint)
+                unset($datosFinales['id_rol_codigo']);
+
+                Usuario::create($datosFinales);
+            }
         }
     }
 }
