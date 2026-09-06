@@ -10,7 +10,7 @@ class ProyectoUsuariosSeeder extends Seeder
     public function run(): void
     {
         $proyectoUsuarios = [
-            // ===== PROYECTO A =====
+            // ===== PROYECTO A (GOOGLE) =====
             ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-COMITE',       'id_organizacion' => 'Google'],
             ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-JEFETI-A',     'id_organizacion' => 'Google'],
             ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERINFRA-A', 'id_organizacion' => 'Google'],
@@ -26,12 +26,35 @@ class ProyectoUsuariosSeeder extends Seeder
             ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-FUNC-A',       'id_organizacion' => 'Google'],
             ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-SCRUM-A',      'id_organizacion' => 'Google'],
 
-            // ===== PROYECTO B =====
+            // ===== PROYECTO B (GOOGLE) =====
             ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-COMITE',       'id_organizacion' => 'Google'],
             ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-JEFETI-B',     'id_organizacion' => 'Google'],
             ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-LIDERCAL-B',   'id_organizacion' => 'Google'],
             ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-LIDERQA-B',    'id_organizacion' => 'Google'],
             ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-SCRUM-B',      'id_organizacion' => 'Google'],
+
+            // ===== PROYECTO A (FACEBOOK) =====
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-COMITE-FB',       'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-JEFETI-A-FB',     'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERINFRA-A-FB', 'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERDEV-A-FB',   'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERIA-A-FB',    'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERCAL-A-FB',   'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERCS-A-FB',    'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-GERENTE-A-FB',    'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERTEC-A-FB',   'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-LIDERQA-A-FB',    'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-DEV-A-FB',        'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-AUTO-A-FB',       'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-FUNC-A-FB',       'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-A', 'id_usuario' => 'USR-SCRUM-A-FB',      'id_organizacion' => 'Facebook'],
+
+            // ===== PROYECTO B (FACEBOOK) =====
+            ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-COMITE-FB',       'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-JEFETI-B-FB',     'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-LIDERCAL-B-FB',   'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-LIDERQA-B-FB',    'id_organizacion' => 'Facebook'],
+            ['id_proyecto' => 'PROJ-B', 'id_usuario' => 'USR-SCRUM-B-FB',      'id_organizacion' => 'Facebook'],
         ];
 
         foreach ($proyectoUsuarios as $pu) {

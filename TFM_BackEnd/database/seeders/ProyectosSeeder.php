@@ -22,6 +22,18 @@ class ProyectosSeeder extends Seeder
                 'nombre_proyecto' => 'Proyecto B',
                 'descripcion'     => 'Proyecto de prueba B',
             ],
+            [
+                'id_proyecto' => 'PROJ-A-FB',
+                'id_organizacion' => 'Facebook',
+                'nombre_proyecto' => 'Proyecto A Facebook',
+                'descripcion' => 'Demo FB A'
+            ],
+            [
+                'id_proyecto' => 'PROJ-B-FB',
+                'id_organizacion' => 'Facebook',
+                'nombre_proyecto' => 'Proyecto B Facebook',
+                'descripcion' => 'Demo FB B'
+            ],
         ];
 
         foreach ($proyectos as $proyecto) {

@@ -15,5 +15,6 @@ class ProyectoUsuario extends Model
         'id_proyecto',
         'id_usuario',
         'id_organizacion',
+        'id_rol_superior_proyecto',
     ];
 }

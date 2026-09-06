@@ -31,9 +31,18 @@ class JerarquiaInicialSeeder extends Seeder
 
         foreach ($jerarquias as $item) {
             JerarquiaInicial::create([
-                'id_jerarquia'    => $item['id_jerarquia'],
+                'id_jerarquia'    => 'G-' . $item['id_jerarquia'],
                 'id_organizacion' => 'Google',
                 'cargo'           => $item['cargo'],
+            ]);
+        }
+
+        foreach ($jerarquias as $item) {
+            JerarquiaInicial::created([
+                'id_jerarquia'    => 'FB-' . $item['id_jerarquia'],
+                'id_organizacion' => 'Facebook',
+                'cargo'           => $item['cargo'],
+
             ]);
         }
     }

@@ -83,7 +83,7 @@ class TicketsController extends Controller
             'id_ticket'        => 'required|unique:tickets,id_ticket',
             'id_organizacion'  => 'required|exists:organizacion,id_organizacion',
             'id_usuario'       => 'required|exists:usuarios,id_usuario',
-            'id_proyecto'      => 'required|exists:proyectos,id_proyecto', // ← nuevo
+            'id_proyecto'      => 'required|exists:proyectos,id_proyecto',
             'id_tipo_producto' => 'required|exists:tipo_productos,id_producto',
             'monto'            => 'nullable|numeric|min:0',
             'proyecto'         => 'nullable|string',
@@ -102,7 +102,7 @@ class TicketsController extends Controller
                 'id_ticket',
                 'id_organizacion',
                 'id_usuario',
-                'id_proyecto',      // ← nuevo
+                'id_proyecto',
                 'id_tipo_producto',
                 'monto',
                 'proyecto',
@@ -110,19 +110,22 @@ class TicketsController extends Controller
             ]);
 
             $ticketData['estado_ticket'] = 'pendiente';
-            $ticketData['fecha_cierre'] = null;
+            $ticketData['fecha_cierre']  = null;
 
             $usuario = Usuario::with('rol')->where('id_usuario', $request->id_usuario)->first();
 
             if ($usuario && $usuario->rol) {
                 $idOrganizacion = (string)$request->id_organizacion;
-                $idProyecto = $request->id_proyecto;
+                $idProyecto     = $request->id_proyecto;
 
-                // PASO 1: Superior directo por jerarquia_roles dentro del proyecto
-                $relacionJerarquica = JerarquiaRol::where('id_rol', $usuario->rol->id)->first();
+                // PASO 1: Buscar superior por proyecto_usuarios.id_rol_superior_proyecto
+                $asignacionProyecto = \App\Models\ProyectoUsuario::where('id_usuario', $request->id_usuario)
+                    ->where('id_proyecto', $idProyecto)
+                    ->whereNull('deleted_at')
+                    ->first();
 
-                if ($relacionJerarquica && $relacionJerarquica->id_rol_superior) {
-                    $aprobador = Usuario::where('id_rol', $relacionJerarquica->id_rol_superior)
+                if ($asignacionProyecto && $asignacionProyecto->id_rol_superior_proyecto) {
+                    $aprobador = Usuario::where('id_rol', $asignacionProyecto->id_rol_superior_proyecto)
                         ->where('id_organizacion', $idOrganizacion)
                         ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
                         ->whereNull('deleted_at')
@@ -133,7 +136,24 @@ class TicketsController extends Controller
                     }
                 }
 
-                // PASO 2: Si no hay superior directo, buscar por nivel dentro del proyecto
+                // PASO 2: Si no encontró por proyecto_usuarios, usar jerarquia_roles
+                if (!isset($ticketData['id_aprobador'])) {
+                    $relacionJerarquica = JerarquiaRol::where('id_rol', $usuario->rol->id)->first();
+
+                    if ($relacionJerarquica && $relacionJerarquica->id_rol_superior) {
+                        $aprobador = Usuario::where('id_rol', $relacionJerarquica->id_rol_superior)
+                            ->where('id_organizacion', $idOrganizacion)
+                            ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
+                            ->whereNull('deleted_at')
+                            ->first();
+
+                        if ($aprobador) {
+                            $ticketData['id_aprobador'] = $aprobador->id_usuario;
+                        }
+                    }
+                }
+
+                // PASO 3: Si no hay superior directo, buscar por nivel dentro del proyecto
                 if (!isset($ticketData['id_aprobador'])) {
                     $nivelUsuario = $usuario->rol->nivel;
 
@@ -151,7 +171,7 @@ class TicketsController extends Controller
                     }
                 }
 
-                // PASO 3: Fallback — Comite Operativo de la organización
+                // PASO 4: Fallback — Comite Operativo de la organización
                 if (!isset($ticketData['id_aprobador'])) {
                     $comiteOperativo = Usuario::whereHas('rol', fn($q) => $q->where('nombre_rol', 'Comite Operativo'))
                         ->where('id_organizacion', $idOrganizacion)
@@ -170,23 +190,23 @@ class TicketsController extends Controller
             // NOTIFICAR AL APROBADOR ASIGNADO
             if (isset($ticketData['id_aprobador'])) {
                 NotificacionesController::crearNotificacion([
-                    'id_usuario'     => $ticketData['id_aprobador'],
+                    'id_usuario'      => $ticketData['id_aprobador'],
                     'id_organizacion' => $ticket->id_organizacion,
-                    'tipo'           => 'ticket_asignado',
-                    'titulo'         => 'Nuevo ticket asignado',
-                    'mensaje'        => "Se te ha asignado el ticket {$ticket->id_ticket} para aprobación. Solicitante: {$usuario->nombre} {$usuario->apellido}",
-                    'id_ticket'      => $ticket->id_ticket
+                    'tipo'            => 'ticket_asignado',
+                    'titulo'          => 'Nuevo ticket asignado',
+                    'mensaje'         => "Se te ha asignado el ticket {$ticket->id_ticket} para aprobación. Solicitante: {$usuario->nombre} {$usuario->apellido}",
+                    'id_ticket'       => $ticket->id_ticket
                 ]);
             }
 
             // REGISTRAR LOG
             $logRequest = new Request([
-                'id_ticket_log' => 'LOG-' . uniqid(),
-                'id_ticket'     => $ticket->id_ticket,
-                'id_usuario'    => $request->id_usuario,
+                'id_ticket_log'   => 'LOG-' . uniqid(),
+                'id_ticket'       => $ticket->id_ticket,
+                'id_usuario'      => $request->id_usuario,
                 'estado_anterior' => null,
-                'estado_nuevo'  => 'pendiente',
-                'fecha_cambio'  => now()
+                'estado_nuevo'    => 'pendiente',
+                'fecha_cambio'    => now()
             ]);
 
             $this->ticketsLogsController->guardar($logRequest);
@@ -422,12 +442,11 @@ class TicketsController extends Controller
 
     public function escalar(Request $request)
     {
-
         $response = new ResultResponse();
 
         $validator = Validator::make($request->all(), [
-            'id_ticket' => 'required|exists:tickets,id_ticket',
-            'id_usuario_actual' => 'requried|exists:usuario,id_usuario'
+            'id_ticket'         => 'required|exists:tickets,id_ticket',
+            'id_usuario_actual' => 'required|exists:usuarios,id_usuario'
         ]);
 
         if ($validator->fails()) {
@@ -460,23 +479,39 @@ class TicketsController extends Controller
                 return response()->json($response, $response->getStatusCode());
             }
 
-            $nivelActual  = $usuarioActual->rol->nivel;
+            $nivelActual    = $usuarioActual->rol->nivel;
             $idOrganizacion = (string)$ticket->id_organizacion;
-            $idProyecto   = $ticket->id_proyecto;
+            $idProyecto     = $ticket->id_proyecto;
             $nuevoAprobador = null;
 
-            // PASO 1: Superior directo por jerarquia_roles dentro del proyecto
-            $relacionJerarquica = JerarquiaRol::where('id_rol', $usuarioActual->rol->id)->first();
+            // PASO 1: Buscar superior por proyecto_usuarios.id_rol_superior_proyecto
+            $asignacionProyecto = \App\Models\ProyectoUsuario::where('id_usuario', $request->id_usuario_actual)
+                ->where('id_proyecto', $idProyecto)
+                ->whereNull('deleted_at')
+                ->first();
 
-            if ($relacionJerarquica && $relacionJerarquica->id_rol_superior) {
-                $nuevoAprobador = Usuario::where('id_rol', $relacionJerarquica->id_rol_superior)
+            if ($asignacionProyecto && $asignacionProyecto->id_rol_superior_proyecto) {
+                $nuevoAprobador = Usuario::where('id_rol', $asignacionProyecto->id_rol_superior_proyecto)
                     ->where('id_organizacion', $idOrganizacion)
                     ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
                     ->whereNull('deleted_at')
                     ->first();
             }
 
-            // PASO 2: Si no hay superior directo, buscar por nivel dentro del proyecto
+            // PASO 2: Si no encontró por proyecto_usuarios, usar jerarquia_roles
+            if (!$nuevoAprobador) {
+                $relacionJerarquica = JerarquiaRol::where('id_rol', $usuarioActual->rol->id)->first();
+
+                if ($relacionJerarquica && $relacionJerarquica->id_rol_superior) {
+                    $nuevoAprobador = Usuario::where('id_rol', $relacionJerarquica->id_rol_superior)
+                        ->where('id_organizacion', $idOrganizacion)
+                        ->whereHas('proyectos', fn($q) => $q->where('proyecto_usuarios.id_proyecto', $idProyecto))
+                        ->whereNull('deleted_at')
+                        ->first();
+                }
+            }
+
+            // PASO 3: Buscar por nivel dentro del proyecto
             if (!$nuevoAprobador) {
                 for ($nivelBuscado = $nivelActual - 1; $nivelBuscado >= 1; $nivelBuscado--) {
                     $nuevoAprobador = Usuario::whereHas('rol', fn($q) => $q->where('nivel', $nivelBuscado))
@@ -489,7 +524,7 @@ class TicketsController extends Controller
                 }
             }
 
-            // PASO 3: Fallback — Comite Operativo de la organización
+            // PASO 4: Fallback — Comite Operativo
             if (!$nuevoAprobador) {
                 $nuevoAprobador = Usuario::whereHas('rol', fn($q) => $q->where('nombre_rol', 'Comite Operativo'))
                     ->where('id_organizacion', $idOrganizacion)
@@ -504,7 +539,7 @@ class TicketsController extends Controller
                 return response()->json($response, $response->getStatusCode());
             }
 
-            $estadoAnterior  = $ticket->estado_ticket;
+            $estadoAnterior    = $ticket->estado_ticket;
             $aprobadorAnterior = $ticket->id_aprobador;
 
             $ticket->estado_ticket = 'en_revision';
@@ -533,12 +568,12 @@ class TicketsController extends Controller
 
             // REGISTRAR LOG
             $logRequest = new Request([
-                'id_ticket_log'  => 'LOG-' . uniqid(),
-                'id_ticket'      => $ticket->id_ticket,
-                'id_usuario'     => $request->id_usuario_actual,
+                'id_ticket_log'   => 'LOG-' . uniqid(),
+                'id_ticket'       => $ticket->id_ticket,
+                'id_usuario'      => $request->id_usuario_actual,
                 'estado_anterior' => $estadoAnterior,
-                'estado_nuevo'   => 'en_revision',
-                'fecha_cambio'   => now()
+                'estado_nuevo'    => 'en_revision',
+                'fecha_cambio'    => now()
             ]);
 
             $this->ticketsLogsController->guardar($logRequest);

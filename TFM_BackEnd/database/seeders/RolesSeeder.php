@@ -37,6 +37,14 @@ class RolesSeeder extends Seeder
                 'id_organizacion' => 'Google',
                 'id_jerarquia'    => $rol['id_jerarquia'],
             ]);
+
+            Roles::create([
+                'id_rol'          => $rol['id_rol'] + 100,
+                'nombre_rol'      => $rol['nombre_rol'],
+                'nivel'           => $rol['nivel'],
+                'id_organizacion' => 'Facebook',
+                'id_jerarquia'    => $rol['id_jerarquia'], // Entero para el id de jerarquia_inicial
+            ]);
         }
     }
 }
