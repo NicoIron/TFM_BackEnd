@@ -93,20 +93,22 @@ Route::middleware(['auth:sanctum', NoCacheMiddleware::class])->group(function ()
         Route::get('/', [TicketsController::class, 'listar']);
         Route::post('/', [TicketsController::class, 'guardar']);
 
-        // Rutas específicas ANTES de las genéricas con parámetros
+        // 1. Rutas estáticas/específicas (DEBEN IR PRIMERO)
+        Route::get('/nextId', [TicketsController::class, 'obtenerSiguienteId']); // <--- AÑADIDA AQUÍ
         Route::get('/usuario/{id_usuario}', [TicketsController::class, 'obtenerTicketsPorUsuario']);
         Route::get('/aprobador/{id_aprobador}', [TicketsController::class, 'obtenerTicketsPorAprobador']);
+        Route::get('/estadisticas/{id_usuario}', [TicketsController::class, 'obtenerEstadisticas']);
+        Route::get('/aprobados/{id_organizacion}', [TicketsController::class, 'obtenerTicketsAprobados']);
+        Route::get('/estadisticas-contabilidad/{id_organizacion}', [TicketsController::class, 'estadisticasContabilidad']);
+
+        // 2. Rutas con parámetros intermedios
         Route::put('/{id}/estado', [TicketsController::class, 'actualizarEstado']);
         Route::put('/{id}/escalar', [TicketsController::class, 'escalar']);
-        Route::get('/estadisticas/{id_usuario}', [TicketsController::class, 'obtenerEstadisticas']);
 
-        // Rutas genéricas al final
+        // 3. Rutas genéricas /{id} (SIEMPRE AL FINAL)
         Route::get('/{id}', [TicketsController::class, 'ver']);
         Route::put('/{id}', [TicketsController::class, 'actualizar']);
         Route::delete('/{id}', [TicketsController::class, 'eliminar']);
-
-        Route::get('/aprobados/{id_organizacion}', [TicketsController::class, 'obtenerTicketsAprobados']);
-        Route::get('/estadisticas-contabilidad/{id_organizacion}', [TicketsController::class, 'estadisticasContabilidad']);
     });
 
     // LOGS DE TICKETS

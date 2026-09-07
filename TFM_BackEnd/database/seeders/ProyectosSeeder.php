@@ -23,16 +23,16 @@ class ProyectosSeeder extends Seeder
                 'descripcion'     => 'Proyecto de prueba B',
             ],
             [
-                'id_proyecto' => 'PROJ-A-FB',
+                'id_proyecto'     => 'PROJ-A-FB', // CAMBIO: revertido, antes 'PROJ-A' (violaba unique global)
                 'id_organizacion' => 'Facebook',
                 'nombre_proyecto' => 'Proyecto A Facebook',
-                'descripcion' => 'Demo FB A'
+                'descripcion'     => 'Demo FB A',
             ],
             [
-                'id_proyecto' => 'PROJ-B-FB',
+                'id_proyecto'     => 'PROJ-B-FB', // CAMBIO: revertido, antes 'PROJ-B' (violaba unique global)
                 'id_organizacion' => 'Facebook',
                 'nombre_proyecto' => 'Proyecto B Facebook',
-                'descripcion' => 'Demo FB B'
+                'descripcion'     => 'Demo FB B',
             ],
         ];
 

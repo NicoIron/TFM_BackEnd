@@ -9,40 +9,46 @@ class JerarquiaInicialSeeder extends Seeder
 {
     public function run(): void
     {
+        JerarquiaInicial::query()->delete();
+
         $jerarquias = [
-            ['id_jerarquia' => 1,  'cargo' => 'Administrador General'],
-            ['id_jerarquia' => 2,  'cargo' => 'Comite Operativo'],
-            ['id_jerarquia' => 3,  'cargo' => 'Jefe TI'],
-            ['id_jerarquia' => 4,  'cargo' => 'Lider de clan Infraestructura'],
-            ['id_jerarquia' => 5,  'cargo' => 'Lider de clan Developer'],
-            ['id_jerarquia' => 6,  'cargo' => 'Lider de clan IA'],
-            ['id_jerarquia' => 7,  'cargo' => 'Lider de clan Calidad'],
-            ['id_jerarquia' => 8,  'cargo' => 'Lider de clan Customer Service'],
-            ['id_jerarquia' => 9,  'cargo' => 'Gerente de Proyecto'],
-            ['id_jerarquia' => 10, 'cargo' => 'Lider Tecnico'],
-            ['id_jerarquia' => 11, 'cargo' => 'Lider Qa'],
-            ['id_jerarquia' => 12, 'cargo' => 'Developer'],
-            ['id_jerarquia' => 13, 'cargo' => 'Automatizador'],
-            ['id_jerarquia' => 14, 'cargo' => 'Funcional'],
-            ['id_jerarquia' => 15, 'cargo' => 'Scrum'],
-            ['id_jerarquia' => 16, 'cargo' => 'Jefe de Contabilidad'],
-            ['id_jerarquia' => 17, 'cargo' => 'Contabilidad'],
+            ['num' => '1',  'cargo' => 'Administrador General'],
+            ['num' => '2',  'cargo' => 'Comite Operativo'],
+            ['num' => '3',  'cargo' => 'Jefe TI'],
+            ['num' => '4',  'cargo' => 'Lider de clan Infraestructura'],
+            ['num' => '5',  'cargo' => 'Lider de clan Developer'],
+            ['num' => '6',  'cargo' => 'Lider de clan IA'],
+            ['num' => '7',  'cargo' => 'Lider de clan Calidad'],
+            ['num' => '8',  'cargo' => 'Lider de clan Customer Service'],
+            ['num' => '9',  'cargo' => 'Gerente de Proyecto'],
+            ['num' => '10', 'cargo' => 'Lider Tecnico'],
+            ['num' => '11', 'cargo' => 'Lider Qa'],
+            ['num' => '12', 'cargo' => 'Developer'],
+            ['num' => '13', 'cargo' => 'Automatizador'],
+            ['num' => '14', 'cargo' => 'Funcional'],
+            ['num' => '15', 'cargo' => 'Scrum'],
+            ['num' => '16', 'cargo' => 'Jefe de Contabilidad'],
+            ['num' => '17', 'cargo' => 'Contabilidad'],
         ];
 
+        // id_jerarquia es un código string ÚNICO GLOBALMENTE (unique() simple,
+        // no compuesto con id_organizacion), por eso Facebook usa +100.
+
+        // Google (codigo '1' al '17')
         foreach ($jerarquias as $item) {
             JerarquiaInicial::create([
-                'id_jerarquia'    => 'G-' . $item['id_jerarquia'],
+                'id_jerarquia'    => (string) $item['num'],
                 'id_organizacion' => 'Google',
                 'cargo'           => $item['cargo'],
             ]);
         }
 
+        // Facebook (codigo '101' al '117')
         foreach ($jerarquias as $item) {
-            JerarquiaInicial::created([
-                'id_jerarquia'    => 'FB-' . $item['id_jerarquia'],
+            JerarquiaInicial::create([
+                'id_jerarquia'    => (string) ((int) $item['num'] + 100),
                 'id_organizacion' => 'Facebook',
                 'cargo'           => $item['cargo'],
-
             ]);
         }
     }

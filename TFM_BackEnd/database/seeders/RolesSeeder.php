@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Roles;
+use App\Models\JerarquiaInicial;
 
 class RolesSeeder extends Seeder
 {
@@ -29,24 +30,40 @@ class RolesSeeder extends Seeder
             ['id_rol' => 17, 'nombre_rol' => 'Contabilidad',                   'nivel' => 8, 'id_jerarquia' => 17],
         ];
 
-        foreach ($roles as $rol) {
-            // Roles para Google (id_rol del 1 al 17)
-            Roles::create([
-                'id_rol'          => $rol['id_rol'],
-                'nombre_rol'      => $rol['nombre_rol'],
-                'nivel'           => $rol['nivel'],
-                'id_organizacion' => 'Google',
-                'id_jerarquia'    => $rol['id_jerarquia'],
-            ]);
+        $organizaciones = ['Google', 'Facebook'];
 
-            // Roles para Facebook (id_rol del 101 al 117)
-            Roles::create([
-                'id_rol'          => $rol['id_rol'] + 100,
-                'nombre_rol'      => $rol['nombre_rol'],
-                'nivel'           => $rol['nivel'],
-                'id_organizacion' => 'Facebook',
-                'id_jerarquia'    => $rol['id_jerarquia'],
-            ]);
+        foreach ($organizaciones as $org) {
+            foreach ($roles as $rol) {
+                // Código de negocio del rol: 1..17 en Google, 101..117 en Facebook
+                $codigoRol = ($org === 'Facebook')
+                    ? (string) ($rol['id_rol'] + 100)
+                    : (string) $rol['id_rol'];
+
+                // Código de negocio de la jerarquía: mismo esquema que JerarquiaInicialSeeder
+                $codigoJerarquia = ($org === 'Facebook')
+                    ? (string) ($rol['id_jerarquia'] + 100)
+                    : (string) $rol['id_jerarquia'];
+
+                // CAMBIO CLAVE: roles.id_jerarquia es FK hacia jerarquia_inicial.id (PK),
+                // así que buscamos el registro por su código + organización y usamos ->id
+                $jerarquiaRegistro = JerarquiaInicial::where('id_jerarquia', $codigoJerarquia)
+                    ->where('id_organizacion', $org)
+                    ->first();
+
+                if (!$jerarquiaRegistro) {
+                    // Si esto se dispara, revisa que JerarquiaInicialSeeder corrió antes
+                    // y que los códigos coinciden.
+                    throw new \RuntimeException("JerarquiaInicial no encontrada: codigo={$codigoJerarquia}, org={$org}");
+                }
+
+                Roles::create([
+                    'id_rol'          => $codigoRol,
+                    'nombre_rol'      => $rol['nombre_rol'],
+                    'nivel'           => $rol['nivel'],
+                    'id_organizacion' => $org,
+                    'id_jerarquia'    => $jerarquiaRegistro->id, // CAMBIO: antes se guardaba el código plano
+                ]);
+            }
         }
     }
 }

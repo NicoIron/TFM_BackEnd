@@ -20,6 +20,7 @@ class JerarquiaRol extends Model
     // Relación con la jerarquía inicial
     public function jerarquia()
     {
+        // CAMBIO: revertido, mismo motivo que en Roles::jerarquia()
         return $this->belongsTo(JerarquiaInicial::class, 'id_jerarquia');
     }
 

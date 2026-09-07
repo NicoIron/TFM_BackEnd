@@ -32,6 +32,8 @@ class Roles extends Model
     // Relación con jerarquía inicial
     public function jerarquia()
     {
+        // CAMBIO: revertido. roles.id_jerarquia es FK real hacia jerarquia_inicial.id,
+        // así que belongsTo sin ownerKey (compara contra la PK) es correcto.
         return $this->belongsTo(JerarquiaInicial::class, 'id_jerarquia');
     }
 

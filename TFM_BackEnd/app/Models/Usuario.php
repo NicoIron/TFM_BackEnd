@@ -34,7 +34,7 @@ class Usuario extends Authenticatable
      */
     public function rol()
     {
-        return $this->belongsTo(Roles::class, 'id_rol', 'id_rol');
+        return $this->belongsTo(Roles::class, 'id_rol', 'id_rol'); // NO estoy seguro del segundi 'id_rol'
     }
 
     /**
@@ -50,6 +50,7 @@ class Usuario extends Authenticatable
      */
     public function jerarquia()
     {
+        // CAMBIO: revertido, mismo motivo que en Roles::jerarquia()
         return $this->belongsTo(JerarquiaInicial::class, 'id_jerarquia');
     }
 

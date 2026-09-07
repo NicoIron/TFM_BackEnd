@@ -17,6 +17,33 @@ class TicketsController extends Controller
 {
     protected $ticketsLogsController;
 
+    public function obtenerSiguienteId()
+    {
+        $response = new ResultResponse();
+
+        try {
+            // Obtener el último id_ticket creado
+            $ultimoTicket = Tickets::orderBy('created_at', 'desc')->first();
+
+            if (!$ultimoTicket) {
+                $siguienteId = 'TCK-1';
+            } else {
+                // Extraer la parte numérica (ejemplo: 'TCK-10' -> 10)
+                $numero = (int) str_replace('TCK-', '', $ultimoTicket->id_ticket);
+                $siguienteId = 'TCK-' . ($numero + 1);
+            }
+
+            $response->setData(['nextId' => $siguienteId]);
+            $response->setStatusCode(ResultResponse::SUCCESS_CODE);
+            $response->setMessage('Siguiente ID obtenido correctamente');
+        } catch (\Exception $e) {
+            $response->setStatusCode(ResultResponse::ERROR_INTERNAL_SERVER);
+            $response->setMessage('Error al obtener el siguiente ID: ' . $e->getMessage());
+        }
+
+        return response()->json($response, $response->getStatusCode());
+    }
+
     public function __construct(TicketsLogsController $ticketsLogsController)
     {
         $this->ticketsLogsController = $ticketsLogsController;
